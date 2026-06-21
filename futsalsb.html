@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>AKSEN CUP ONLINE SCOREBOARD - Futsal</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+    <!-- Favicons -->
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <!-- Vendor CSS Files -->
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+    <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <!-- Template Main CSS File -->
+    <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+label, .day, .match .team, .match .score {
+  color: black;
+}
+
+.scoreboard-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.match-list {
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.day-selection select, .category-selection select {
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  -webkit-box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+  -moz-box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+  box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+}
+
+  /* Media query for mobile */
+  @media only screen and (max-width: 768px) {
+    /* Optionally target options specifically */
+    select option {
+      font-size: 8px; 
+    }
+  }
+
+
+
+
+.match {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  margin: 10px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+  -webkit-box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+  -moz-box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+  box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+}
+
+.match .team {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.match .score {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+    </style>
+  </head>
+  <body>
+    <header id="header" class="fixed-top d-flex align-items-center header-transparent header">
+      <div class="container d-flex align-items-center justify-content-between">
+        <div class="logo">
+          <a href="index.html"><img src="assets/img/navbar-logo.png" alt="" class="img-fluid"></a>
+        </div>
+  
+        <nav id="navbar" class="navbar">
+          <ul>
+            <li><a class="nav-link scrollto " href="index.html">Home</a></li>
+            <li><a href="https://regist.fortelations.com/"><button>Registration</button></a></li>
+          </ul>
+          <i class="bi bi-list mobile-nav-toggle"></i>
+        </nav><!-- .navbar -->
+      </div>
+    </header>
+
+      <h1 class="competitionsh1" style="margin-top: 100px; font-weight: 800; font-size: 100px; text-shadow: rgba(255,255,255,0.9) 0px 0px 49px;" align="center">Futsal</h1>
+
+      <div class="scoreboard-container" >
+        <div class="category-selection">
+          <label for="category"></label>
+          <select id="category" onchange="showMatches()">
+            <option value="men">Putra</option>
+            <option value="women">Putri</option>
+          </select>
+        </div>
+
+        <div class="day-selection">
+          <label for="date"></label>
+          <select id="date" onchange="showMatches()">
+            <option value="2026-09-23">23 Sept</option>
+            <option value="2026-09-24">24 Sept</option>
+            <option value="2026-09-25">25 Sept</option>
+            <option value="2026-09-26">26 Sept</option>
+            <option value="2026-09-27">27 Sept</option>
+            <option value="2026-09-28">28 Sept</option>
+            <option value="2026-09-30">30 Sept</option>
+            <option value="2026-10-01">1 Oct</option>
+            <option value="2026-10-02">2 Oct</option>
+            <option value="2026-10-03">3 Oct</option>
+          </select>
+        </div>
+
+        <div class="match-list" id="match-list">
+
+        </div>
+      </div>
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-left">
+          <video src="assets/img/rusa-loop.webm" class="footer-favicon" autoplay loop muted playsinline></video>
+        </div>
+        <div class="footer-center">
+          <img src="assets/img/Sylvara.png" class="footer-center-logo">
+        </div>
+        <div class="footer-right">
+          <div class="social-media-icons">
+            <a href="https://www.instagram.com/fortelations/?hl=en" target="_blank"><i class='bx bxl-instagram'></i></a>
+            <a href="https://www.tiktok.com/@fortelations" target="_blank"><i class='bx bxl-tiktok'></i></a>
+            <a href="https://www.youtube.com/@smak7penabur" target="_blank"><i class='bx bxl-youtube'></i></a>
+            <a href="mailto:aksenfortelations@gmail.com"><i class='bx bx-envelope'></i></a>
+          </div>
+          <div class="footer-contact">
+            <p class="contact-name">Nathanael Edgar</p>
+            <p class="contact-whatsapp"><a href="https://wa.me/628125000318"><i class='bx bxl-whatsapp'></i> +62 812-5000-318</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; Copyright <strong><span>Fortelation</span></strong> 2026. All Rights Reserved
+      </div>
+    </div>
+  </footer>
+
+            <a href="#" class="back-to-top d-flex align-items-center justify-content-center">
+              <i class="bi bi-arrow-up-short"></i>
+            </a>
+            <div id="preloader"></div>
+            <!-- Vendor JS Files -->
+            <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+            <script src="assets/vendor/aos/aos.js"></script>
+            <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+            <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+            <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+            <script src="assets/vendor/php-email-form/validate.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/gsap.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/ScrollTrigger.min.js"></script>
+            <!-- Template Main JS File -->
+            <script src="assets/js/main.js"></script>
+      <script>
+        const matches = {
+          men: {
+            '2026-09-23': [
+              { teamA: 'SMK ANGKASA 1 (A)', teamB: 'SMA PGRI 1', scoreA: 2, scoreB: 4 },
+              { teamA: 'SMK PGRI 8', teamB: 'SMA PERGURUAN RAKYAT 3', scoreA: 0, scoreB: 2  },
+              { teamA: 'SMK ANGKASA 1 (B)', teamB: 'SMAN 62 (A)', scoreA: 2, scoreB:2  },
+              { teamA: 'SMA PGRI 24', teamB: 'SMAN 36', scoreA: 1, scoreB:0 },
+              { teamA: 'SMK LPINA ', teamB: 'SMK NURUL ISLAM', scoreA: 0, scoreB: 2  },
+              { teamA: 'SMAN 8 ', teamB: 'SMAN 21', scoreA:4 , scoreB:4 },
+            ],
+            '2026-09-24': [
+            { teamA: 'SMAN 50 (B) ', teamB: 'SMK BUDAYA ', scoreA: 1 , scoreB: 2},
+              { teamA: 'SMA PUSAKA 1 (B)', teamB: 'SMA PSKD 2', scoreA: 1, scoreB: 6  },
+              { teamA: 'SMAN 50 (A)', teamB: 'SMAN 53', scoreA: 2, scoreB: 6 },
+              { teamA: 'SMA PUSAKA 1 (A) ', teamB: 'SMK YADIKA 6 ', scoreA: 1, scoreB: 6 },
+              { teamA: 'SMAN 62 (B) ', teamB: 'SMKN 10', scoreA: 'TBD', scoreB: 'TBD'  },
+              { teamA: 'SMK PUTRA PERTIWI ', teamB: 'SMA DON BOSCO 2', scoreA: 3 , scoreB: 2 },
+              ],
+                          '2026-09-25': [
+            { teamA: 'SMA BUDI MULIA', teamB: 'SMAN 62 (B)', scoreA: 1 , scoreB: 2},
+              { teamA: 'SMAK PENABUR HI', teamB: 'SMAN 53', scoreA: 1, scoreB: 6  },
+              { teamA: 'SMAN 50 (B)', teamB: 'SMK LPINA', scoreA: 2, scoreB: 6 },
+              { teamA: 'SMK YADIKA 6', teamB: 'SMK PUTRA PERTIWI', scoreA: 7, scoreB: 1 },
+              { teamA: 'SMAN 8', teamB: 'SMK ANGKASA 1 (B)', scoreA: 8, scoreB: 0  },              ],
+             '2026-09-26': [
+            { teamA: 'SMKN 10', teamB: 'SMA BUDI MULIA', scoreA: 2 , scoreB: 0},
+              { teamA: 'SMAN 36', teamB: 'SMK ANGKASA 1 (A)', scoreA: 3, scoreB: 2  },
+              { teamA: 'SMK NURUL ISLAM', teamB: 'SMK BUDAYA', scoreA: 2, scoreB: 2 },
+              { teamA: 'SMA FONS VITAE 1', teamB: 'SMA PUSAKA 1 (B)', scoreA: 'TBD', scoreB: 'TBD' },
+              { teamA: 'SMA PGRI 1', teamB: 'SMA PGRI 24    ', scoreA: 3, scoreB: 4  },
+              { teamA: 'SMAN 50 (A)', teamB: 'SMAN 12', scoreA: 0, scoreB: 2 },
+            { teamA: 'SMAK 7 PENABUR (B)', teamB: 'SMA PGRI 8', scoreA: 2, scoreB: 0 },
+
+              ],
+                           '2026-09-27': [
+              { teamA: 'SMAK PENABUR HI', teamB: 'SMAN 50 (A)', scoreA: 1, scoreB: 7  },
+              { teamA: 'SMA DON BOSCO 2', teamB: 'SMA YADIKA 6', scoreA: 0, scoreB: 5  },
+              { teamA: 'SMK PUTRA PERTIWI', teamB: 'SMK PUSAKA 1 (A)', scoreA: 0, scoreB: 8 },
+              { teamA: 'SMA ANGKASA 1 (A)', teamB: 'SMA PGRI 24', scoreA: 1, scoreB: 1 },
+              { teamA: 'SMAN 21', teamB: 'SMAN 62 (A)', scoreA: 3, scoreB: 1  },
+              { teamA: 'SMA FONS VITAE 1', teamB: 'SMAN 71', scoreA: 1, scoreB: 2 },
+                            { teamA: 'SMAK 7 PENABUR (A)', teamB: 'SMA BUDI MULIA', scoreA: 1, scoreB: 1 },
+
+              ],
+          },
+          women: {
+            '2026-09-23': [
+              { teamA: 'SMK BUDAYA', teamB: 'SMA ANGKASA 2', scoreA: 1, scoreB: 2 },
+              { teamA: 'SMA ISLAM AS SYAFIIYAH 01', teamB: 'SMAN 53', scoreA: 4 , scoreB: 6  },
+            ],
+            '2026-09-24': [
+              { teamA: 'SMKN 1 BEKASI', teamB: 'SMK YADIKA 6 ', scoreA: 'TBD', scoreB: 'TBD' },
+            ],
+            '2026-09-25': [
+            { teamA: 'SMK 1 JAKARTA TIMUR', teamB: 'SMK BUDAYA', scoreA: 1 , scoreB: 2},
+              { teamA: 'SMAK PENABUR KOTA WISATA', teamB: 'SMA ISLAM AS SYAFIIYAH 01', scoreA: 1, scoreB: 1  },
+              { teamA: 'SMKN 1 BEKASI', teamB: 'SMK YADIKA 6', scoreA: 2, scoreB: 0 },
+              ],
+                          '2026-09-26': [
+            { teamA: 'SMAK 7 PENABUR', teamB: 'SMA YADIKA 6', scoreA: 0 , scoreB: 3},
+              ],
+                                        '2026-09-27': [
+            { teamA: 'SMAK 7 PENABUR', teamB: 'SMKN 1 BEKASI', scoreA: 0 , scoreB: 11},
+              ],
+          },
+        };
+
+        function showMatches() {
+          const category = document.getElementById('category').value;
+          const date = document.getElementById('date').value;
+          const matchList = document.getElementById('match-list');
+          matchList.innerHTML = ''; // Clear previous matches
+
+          if (!matches[category] || !matches[category][date]) {
+            matchList.innerHTML = '<p>Match belum tersedia.</p>';
+            return;
+          }
+
+          matches[category][date].forEach(match => {
+            const matchElement = document.createElement('div');
+            matchElement.className = 'match';
+            matchElement.innerHTML = `
+              <div class="team">${match.teamA}</div>
+              <div class="score">${match.scoreA} - ${match.scoreB}</div>
+              <div class="team">${match.teamB}</div>
+            `;
+            matchList.appendChild(matchElement);
+          });
+        }
+
+        showMatches();
+      </script>
+
+  </body>
+</html>

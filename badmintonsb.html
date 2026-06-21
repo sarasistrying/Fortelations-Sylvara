@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>AKSEN CUP ONLINE SCOREBOARD - Badminton</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+    <!-- Favicons -->
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <!-- Vendor CSS Files -->
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+    <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <!-- Template Main CSS File -->
+    <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+label, .day, .match .team, .match .score {
+  color: black;
+}
+
+.scoreboard-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.match-list {
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.day-selection select, .category-selection select {
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  -webkit-box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+  -moz-box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+  box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+}
+
+.match {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  margin: 10px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+  -webkit-box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+  -moz-box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+  box-shadow: 0px 0px 107px 6px rgba(234,255,46,0.36);
+}
+
+.match .team {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.match .score {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+    </style>
+  </head>
+  <body>
+    <header id="header" class="fixed-top d-flex align-items-center header-transparent header">
+      <div class="container d-flex align-items-center justify-content-between">
+        <div class="logo">
+          <a href="index.html"><img src="assets/img/navbar-logo.png" alt="" class="img-fluid"></a>
+        </div>
+  
+        <nav id="navbar" class="navbar">
+          <ul>
+            <li><a class="nav-link scrollto " href="index.html">Home</a></li>
+            <li><a href="https://regist.fortelations.com/"><button>Registration</button></a></li>
+          </ul>
+          <i class="bi bi-list mobile-nav-toggle"></i>
+        </nav><!-- .navbar -->
+      </div>
+    </header>
+
+      <h1 class="competitionsh1" style="margin-top: 100px; font-weight: 800; font-size: 100px; text-shadow: rgba(255,255,255,0.9) 0px 0px 49px;" align="center">Bulu Tangkis</h1>
+
+      <div class="scoreboard-container" style="height: 100vh;">
+        <div class="category-selection">
+          <label for="category"></label>
+          <select id="category" onchange="showMatches()">
+            <option value="men">Ganda Putra</option>
+            <option value="women">Ganda Putri</option>
+            <option value="mixed">Ganda Campuran</option>
+          </select>
+        </div>
+
+        <div class="day-selection">
+          <label for="date"></label>
+          <select id="date" onchange="showMatches()">
+            <option value="2026-10-01">1 Oct</option>
+            <option value="2026-10-02">2 Oct</option>
+            <option value="2026-10-03">3 Oct</option>
+          </select>
+        </div>
+
+        <div class="match-list" id="match-list" >
+
+        </div>
+      </div>
+
+      <script>
+        const matches = {
+          men: {
+            // '2026-10-01': [
+            //   { teamA: 'SMAK 7 PENABUR A', teamB: 'SMAK 5 PENABUR', scoreA: 5, scoreB: 3 },
+            //   { teamA: 'SMA Fons Vitae 1', teamB: 'SMA Santo Antonius', scoreA: 2, scoreB: 6 },
+            // ],
+            // '2026-10-02': [
+            //   { teamA: 'SMAK 1 PENABUR A', teamB: 'SMAK 2 PENABUR ', scoreA: 4, scoreB: 4 },
+            //   { teamA: 'SMAK 7 PENABUR B', teamB: 'SMA Skibidi Ohio Sigma', scoreA: 1, scoreB: 2 },
+            // ],
+          },
+          women: {
+            // '2026-10-01': [
+            //   { teamA: 'SMAK 1 PENABUR B', teamB: 'Harvard University', scoreA: 3, scoreB: 2 },
+            //   { teamA: 'Nanyang Technological University', teamB: 'Yale University', scoreA: 5, scoreB: 4 },
+            // ],
+            // '2026-10-02': [
+            //   { teamA: 'California Institue of Technology', teamB: 'Duke University', scoreA: 1, scoreB: 6 },
+            //   { teamA: 'Lakers', teamB: 'Univesity of Pennsylvania', scoreA: 2, scoreB: 3 },
+            // ],
+          },
+          mixed: {
+            // '2026-10-01': [
+            //   { teamA: 'Real Madrid', teamB: 'Barcelona', scoreA: 3, scoreB: 5 },
+            //   { teamA: 'Manchester United', teamB: 'Manchester City', scoreA: 4, scoreB: 4 },
+            // ],
+            // '2026-10-02': [
+            //   { teamA: 'Anthony Sinisuka Ginting', teamB: 'Jonathan Christie', scoreA: 5, scoreB: 6 },
+            //   { teamA: 'Viktor Axelsen', teamB: 'Lee Zii Jia', scoreA: 2, scoreB: 1 },
+            // ],
+            // '2026-10-03': [
+            //   { teamA: 'JAJAJAJAJAJ', teamB: 'JASDASDASDASD', scoreA: 5, scoreB: 6 },
+            //   { teamA: 'BEETHOVEN', teamB: 'A-DS0UBAS9OIUDIAUSD', scoreA: 2, scoreB: 1 },
+            // ],
+          },
+        };
+
+        function showMatches() {
+          const category = document.getElementById('category').value;
+          const date = document.getElementById('date').value;
+          const matchList = document.getElementById('match-list');
+          matchList.innerHTML = ''; // Clear previous matches
+
+          if (!matches[category] || !matches[category][date]) {
+            matchList.innerHTML = '<p>Match belum tersedia.</p>';
+            return;
+          }
+
+          matches[category][date].forEach(match => {
+            const matchElement = document.createElement('div');
+            matchElement.className = 'match';
+            matchElement.innerHTML = `
+              <div class="team">${match.teamA}</div>
+              <div class="score">${match.scoreA} - ${match.scoreB}</div>
+              <div class="team">${match.teamB}</div>
+            `;
+            matchList.appendChild(matchElement);
+          });
+        }
+
+        // Initially show the matches for the first day and first category
+        showMatches();
+      </script>
+    
+  </body>
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-left">
+          <video src="assets/img/rusa-loop.webm" class="footer-favicon" autoplay loop muted playsinline></video>
+        </div>
+        <div class="footer-center">
+          <img src="assets/img/Sylvara.png" class="footer-center-logo">
+        </div>
+        <div class="footer-right">
+          <div class="social-media-icons">
+            <a href="https://www.instagram.com/fortelations/?hl=en" target="_blank"><i class='bx bxl-instagram'></i></a>
+            <a href="https://www.tiktok.com/@fortelations" target="_blank"><i class='bx bxl-tiktok'></i></a>
+            <a href="https://www.youtube.com/@smak7penabur" target="_blank"><i class='bx bxl-youtube'></i></a>
+            <a href="mailto:aksenfortelations@gmail.com"><i class='bx bx-envelope'></i></a>
+          </div>
+          <div class="footer-contact">
+            <p class="contact-name">Nathanael Edgar</p>
+            <p class="contact-whatsapp"><a href="https://wa.me/628125000318"><i class='bx bxl-whatsapp'></i> +62 812-5000-318</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; Copyright <strong><span>Fortelation</span></strong> 2026. All Rights Reserved
+      </div>
+    </div>
+  </footer>
+
+  
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+    <div id="preloader"></div>
+  
+    <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="assets/vendor/php-email-form/validate.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@latest"></script>
+    <script src="https://unpkg.com/split-type"></script>
+  
+    <script src="assets/js/main.js"></script>
+      
+  
+  <script>
+  const lenis = new Lenis()
+  lenis.on('scroll', (e) => {
+    console.log(e)
+  })
+  lenis.on('scroll', ScrollTrigger.update)
+  gsap.ticker.add((time) => {
+    lenis.raf(time * 1000)
+  })
+  </script>
+</html>
