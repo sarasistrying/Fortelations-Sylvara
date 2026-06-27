@@ -45,6 +45,41 @@
     }
 
     /* ============================================================
+       .gedungbg ON MOBILE ONLY
+       Per your request: left.webp/right.webp and .resplendent are
+       left completely alone, exactly as style.css already has
+       them. Only .gedungbg (Hero Page Animation.webp, the center
+       pond/rocks scene) gets a mobile-only fix here.
+
+       Hero_Page_Animation.webp is a 3840x2160 canvas where the
+       real art is a wide, short strip (2663x627px) near the
+       bottom-center -- most of the canvas is transparent. Without
+       this, the desktop-only fixed 1920x1080px rule from
+       style.css just keeps that same huge canvas size on mobile
+       too (since style.css's own mobile override never touches
+       .gedungbg), so on a narrow screen either very little of the
+       real artwork is visible or it overflows oddly. This rule
+       only applies at the mobile breakpoint -- desktop is
+       completely unaffected and still uses style.css's own rule.
+       ============================================================ */
+    @media (max-width: 768px) {
+      .gedungbg {
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        height: 18vh !important;
+        max-height: 220px !important;
+        aspect-ratio: 2663 / 627 !important;
+        width: auto !important;
+        max-width: 95vw !important;
+        object-fit: cover !important;
+        object-position: 50% 100% !important;
+      }
+    }
+
+    /* ============================================================
        COMPETITIONS — IRREGULAR ROCK SCATTER
        Fresh approach: rocks are placed at fixed percentage
        coordinates within a fixed-height scatter area, so the
