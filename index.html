@@ -24,6 +24,267 @@
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
   <link href="assets/css/style.css" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       BACKGROUND FIX
+       The hero's animated background image was scoped only to
+       #hero, so it scrolled away before reaching #competitions (or
+       anything else below the fold). Making it position:fixed lets
+       it sit behind the entire page instead.
+       ============================================================ */
+    .parallaxbackground {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       COMPETITIONS — IRREGULAR ROCK SCATTER
+       Fresh approach: rocks are placed at fixed percentage
+       coordinates within a fixed-height scatter area, so the
+       composition is identical on every screen size — it just
+       scales rather than reflowing. No scroll-driven movement;
+       position is the whole point here.
+       ============================================================ */
+
+    .competitions-section {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding-bottom: 160px;
+    }
+
+    .competitions-heading {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      padding: 100px 20px 60px;
+    }
+
+    .competitions-heading h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: clamp(28px, 5vw, 48px);
+      color: #FCDD8B;
+      text-shadow: 0 0 12px #B8BE49, 0 0 30px rgba(239, 157, 109, 0.35);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+
+    .competitions-heading p {
+      font-family: 'Open Sans', sans-serif;
+      font-size: clamp(13px, 1.6vw, 16px);
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+    }
+
+    .competitions-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       ROCK SCATTER
+       Each rock is placed at a percentage position (left/top) so
+       its spot in the composition stays identical on every screen
+       size — the whole arrangement just scales up or down rather
+       than reflowing. Size is also percentage/viewport based for
+       the same reason. "z" is simulated via z-index + a subtle
+       scale/blur so rocks read as nearer or farther without
+       actually needing 3D.
+       ============================================================ */
+
+    .rock-scatter {
+      position: relative;
+      width: 100%;
+      max-width: 1300px;
+      margin: 0 auto;
+      height: 420vh;
+      z-index: 1;
+    }
+
+    .rock {
+      position: absolute !important;
+      width: 18% !important;
+      height: auto !important;
+      aspect-ratio: 1 / 1 !important;
+      cursor: pointer !important;
+      display: block !important;
+      border: none !important;
+      outline: none !important;
+      background: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      font-size: 0 !important;
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      -webkit-tap-highlight-color: transparent;
+      will-change: transform;
+      transform: translate(-50%, -50%) scale(var(--depth-scale, 1)) !important;
+      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    }
+
+    .rock:hover,
+    .rock:focus-visible {
+      transform: translate(-50%, -50%) scale(calc(var(--depth-scale, 1) * 1.08)) !important;
+      box-shadow: none !important;
+    }
+
+    .rock:active {
+      transform: translate(-50%, -50%) scale(calc(var(--depth-scale, 1) * 1.08)) !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+
+    .rock img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
+      transition: filter 0.3s ease;
+    }
+
+    .rock:hover img,
+    .rock:focus-visible img {
+      filter: drop-shadow(0 0 14px rgba(184, 190, 73, 0.65)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+    }
+
+    .rock-label {
+      position: absolute;
+      left: 50%;
+      bottom: -6%;
+      transform: translate(-50%, 0);
+      width: 92%;
+      text-align: center;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: clamp(9px, 1.1vw, 12px);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: #FCDD8B;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.85), 0 0 10px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+      line-height: 1.2;
+    }
+
+    .rock:hover .rock-label,
+    .rock:focus-visible .rock-label {
+      opacity: 1;
+    }
+
+    /* ============================================================
+       HOVER DETAIL TOOLTIP
+       Each rock carries its own tooltip, anchored directly to it
+       rather than a shared full-screen modal. It opens toward the
+       center of the path: rocks on the left side of the screen
+       open their tooltip to the right, rocks on the right side
+       open theirs to the left — so the card never runs off-screen
+       and always reads "inward" from the stone.
+       ============================================================ */
+
+    .rock-tooltip {
+      position: absolute;
+      top: 50%;
+      width: clamp(130px, 16vw, 220px);
+      background: rgba(20, 26, 16, 0.94);
+      border: 2px solid rgba(184, 190, 73, 0.45);
+      border-radius: 16px;
+      padding: 14px 16px 16px;
+      text-align: left;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      z-index: 50;
+    }
+
+    /* anchored to a left-side rock: tooltip opens to the right */
+    .rock-tooltip.side-right {
+      left: 100%;
+      margin-left: 10px;
+      transform: translateY(-50%) translateX(-8px);
+    }
+
+    /* anchored to a right-side rock: tooltip opens to the left */
+    .rock-tooltip.side-left {
+      right: 100%;
+      margin-right: 10px;
+      transform: translateY(-50%) translateX(8px);
+    }
+
+    .rock:hover .rock-tooltip,
+    .rock:focus-visible .rock-tooltip {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .rock:hover .rock-tooltip.side-right,
+    .rock:focus-visible .rock-tooltip.side-right {
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .rock:hover .rock-tooltip.side-left,
+    .rock:focus-visible .rock-tooltip.side-left {
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .rock-tooltip h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: clamp(14px, 1.6vw, 17px);
+      color: #FCDD8B;
+      text-shadow: 0 0 10px #B8BE49;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin: 0 0 6px;
+    }
+
+    .rock-tooltip p {
+      font-family: 'Open Sans', sans-serif;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: clamp(11px, 1.2vw, 13px);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* On touch/small screens, side-flipped tooltips risk running off
+       the opposite edge since rocks already sit close to the inset
+       boundary there — center them under the rock instead */
+    @media (max-width: 700px) {
+      .rock-tooltip,
+      .rock-tooltip.side-left,
+      .rock-tooltip.side-right {
+        left: 50%;
+        right: auto;
+        top: 100%;
+        margin: 12px 0 0;
+        transform: translateX(-50%) translateY(-6px);
+        width: clamp(160px, 60vw, 220px);
+      }
+
+      .rock:hover .rock-tooltip,
+      .rock:focus-visible .rock-tooltip {
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -39,6 +300,7 @@
       <nav id="navbar" class="navbar">
         <ul>
           <li><a class="nav-link scrollto active" href="index.html">Home</a></li>
+          <li><a class="nav-link scrollto" href="#competitions">Competitions</a></li>
           <li><a href="https://regist.fortelations.com/"><button>Registration</button></a></li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
@@ -68,31 +330,32 @@
 
       <div class="countdown-timer" id="countdown" style="
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: clamp(16px, 3vw, 30px);
-        max-width: min(90vw, 900px);
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: clamp(20px, 4vw, 44px);
+        max-width: min(95vw, 1400px);
         width: 100%;
         margin-bottom: 40px;
       ">
         <div class="countdown-box" style="
           background: rgba(0,0,0,0.55);
           border: 2px solid rgba(184, 190, 73, 0.4);
-          border-radius: 20px;
-          padding: 30px 20px;
+          border-radius: 28px;
+          padding: 48px 32px;
           text-align: center;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
           transition: all 0.3s ease;
         ">
-          <div class="countdown-number" id="days" style="
-            font-size: clamp(32px, 6vw, 56px);
-            font-weight: 800;
-            color: #FCDD8B;
-            text-shadow: 0 0 15px #B8BE49;
-            line-height: 1;
+          <div class="countdown-number countdown-number-img" id="days" style="
+            display: flex;
+            justify-content: center;
+            gap: 4px;
             margin-bottom: 10px;
-          ">0</div>
+          ">
+            <img class="countdown-digit" data-slot="days-0" src="assets/img/Numbers/0.png" alt="0" style="height: clamp(56px, 11vw, 110px); width: auto; filter: drop-shadow(0 0 15px #B8BE49);">
+            <img class="countdown-digit" data-slot="days-1" src="assets/img/Numbers/0.png" alt="0" style="height: clamp(56px, 11vw, 110px); width: auto; filter: drop-shadow(0 0 15px #B8BE49);">
+          </div>
           <div class="countdown-label" style="
-            font-size: clamp(12px, 2vw, 16px);
+            font-size: clamp(15px, 2.4vw, 20px);
             font-weight: 600;
             color: #FCDD8B;
             text-shadow: 0px 0px 20px rgba(252, 221, 139, 0.6);
@@ -102,22 +365,23 @@
         <div class="countdown-box" style="
           background: rgba(0,0,0,0.55);
           border: 2px solid rgba(184, 190, 73, 0.4);
-          border-radius: 20px;
-          padding: 30px 20px;
+          border-radius: 28px;
+          padding: 48px 32px;
           text-align: center;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
           transition: all 0.3s ease;
         ">
-          <div class="countdown-number" id="hours" style="
-            font-size: clamp(32px, 6vw, 56px);
-            font-weight: 800;
-            color: #FCDD8B;
-            text-shadow: 0 0 15px #B8BE49;
-            line-height: 1;
+          <div class="countdown-number countdown-number-img" id="hours" style="
+            display: flex;
+            justify-content: center;
+            gap: 4px;
             margin-bottom: 10px;
-          ">0</div>
+          ">
+            <img class="countdown-digit" data-slot="hours-0" src="assets/img/Numbers/0.png" alt="0" style="height: clamp(56px, 11vw, 110px); width: auto; filter: drop-shadow(0 0 15px #B8BE49);">
+            <img class="countdown-digit" data-slot="hours-1" src="assets/img/Numbers/0.png" alt="0" style="height: clamp(56px, 11vw, 110px); width: auto; filter: drop-shadow(0 0 15px #B8BE49);">
+          </div>
           <div class="countdown-label" style="
-            font-size: clamp(12px, 2vw, 16px);
+            font-size: clamp(15px, 2.4vw, 20px);
             font-weight: 600;
             color: #FCDD8B;
             text-shadow: 0px 0px 20px rgba(252, 221, 139, 0.6);
@@ -127,22 +391,23 @@
         <div class="countdown-box" style="
           background: rgba(0,0,0,0.55);
           border: 2px solid rgba(184, 190, 73, 0.4);
-          border-radius: 20px;
-          padding: 30px 20px;
+          border-radius: 28px;
+          padding: 48px 32px;
           text-align: center;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
           transition: all 0.3s ease;
         ">
-          <div class="countdown-number" id="minutes" style="
-            font-size: clamp(32px, 6vw, 56px);
-            font-weight: 800;
-            color: #FCDD8B;
-            text-shadow: 0 0 15px #B8BE49;
-            line-height: 1;
+          <div class="countdown-number countdown-number-img" id="minutes" style="
+            display: flex;
+            justify-content: center;
+            gap: 4px;
             margin-bottom: 10px;
-          ">0</div>
+          ">
+            <img class="countdown-digit" data-slot="minutes-0" src="assets/img/Numbers/0.png" alt="0" style="height: clamp(56px, 11vw, 110px); width: auto; filter: drop-shadow(0 0 15px #B8BE49);">
+            <img class="countdown-digit" data-slot="minutes-1" src="assets/img/Numbers/0.png" alt="0" style="height: clamp(56px, 11vw, 110px); width: auto; filter: drop-shadow(0 0 15px #B8BE49);">
+          </div>
           <div class="countdown-label" style="
-            font-size: clamp(12px, 2vw, 16px);
+            font-size: clamp(15px, 2.4vw, 20px);
             font-weight: 600;
             color: #FCDD8B;
             text-shadow: 0px 0px 20px rgba(252, 221, 139, 0.6);
@@ -152,22 +417,23 @@
         <div class="countdown-box" style="
           background: rgba(0,0,0,0.55);
           border: 2px solid rgba(184, 190, 73, 0.4);
-          border-radius: 20px;
-          padding: 30px 20px;
+          border-radius: 28px;
+          padding: 48px 32px;
           text-align: center;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
           transition: all 0.3s ease;
         ">
-          <div class="countdown-number" id="seconds" style="
-            font-size: clamp(32px, 6vw, 56px);
-            font-weight: 800;
-            color: #FCDD8B;
-            text-shadow: 0 0 15px #B8BE49;
-            line-height: 1;
+          <div class="countdown-number countdown-number-img" id="seconds" style="
+            display: flex;
+            justify-content: center;
+            gap: 4px;
             margin-bottom: 10px;
-          ">0</div>
+          ">
+            <img class="countdown-digit" data-slot="seconds-0" src="assets/img/Numbers/0.png" alt="0" style="height: clamp(56px, 11vw, 110px); width: auto; filter: drop-shadow(0 0 15px #B8BE49);">
+            <img class="countdown-digit" data-slot="seconds-1" src="assets/img/Numbers/0.png" alt="0" style="height: clamp(56px, 11vw, 110px); width: auto; filter: drop-shadow(0 0 15px #B8BE49);">
+          </div>
           <div class="countdown-label" style="
-            font-size: clamp(12px, 2vw, 16px);
+            font-size: clamp(15px, 2.4vw, 20px);
             font-weight: 600;
             color: #FCDD8B;
             text-shadow: 0px 0px 20px rgba(252, 221, 139, 0.6);
@@ -177,7 +443,21 @@
 
     </section>
 
+    <section id="competitions" class="competitions-section">
+
+      <img src="assets/img/Pure Background Animation.webp" class="competitions-bg" loading="lazy" alt="">
+
+      <div class="competitions-heading">
+        <h2>Competitions</h2>
+        <p>Every stone marks a battlefield of its own.</p>
+      </div>
+
+      <div class="rock-scatter" id="rockScatter"></div>
+
+    </section>
+
   </main>
+
   <footer id="footer">
     <div class="container">
       <div class="footer-content">
@@ -226,35 +506,52 @@
   <script src="assets/js/main.js"></script>
 <script>
     // Countdown Timer Logic
+    const countdownDigitState = {}; // tracks last-rendered digit per slot to avoid redundant DOM writes
+
+    function setCountdownValue(id, value) {
+      const str = String(value).padStart(2, '0');
+      const tens = str[0];
+      const ones = str[1];
+
+      [tens, ones].forEach((digit, i) => {
+        const slotKey = `${id}-${i}`;
+        if (countdownDigitState[slotKey] === digit) return; // no change, skip
+        countdownDigitState[slotKey] = digit;
+
+        const img = document.querySelector(`[data-slot="${slotKey}"]`);
+        if (img) {
+          img.src = `assets/img/Numbers/${digit}.png`;
+          img.alt = digit;
+        }
+      });
+    }
+
     function startCountdown() {
       const countdownDate = new Date("September 12, 2026 06:00:00").getTime();
-      
+
       function updateCountdown() {
         const now = new Date().getTime();
         const distance = countdownDate - now;
-        
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        
-        document.getElementById("days").textContent = String(days).padStart(2, '0');
-        document.getElementById("hours").textContent = String(hours).padStart(2, '0');
-        document.getElementById("minutes").textContent = String(minutes).padStart(2, '0');
-        document.getElementById("seconds").textContent = String(seconds).padStart(2, '0');
-        
+
+        let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
         if (distance < 0) {
-          document.getElementById("days").textContent = "00";
-          document.getElementById("hours").textContent = "00";
-          document.getElementById("minutes").textContent = "00";
-          document.getElementById("seconds").textContent = "00";
+          days = 0; hours = 0; minutes = 0; seconds = 0;
         }
+
+        setCountdownValue("days", days);
+        setCountdownValue("hours", hours);
+        setCountdownValue("minutes", minutes);
+        setCountdownValue("seconds", seconds);
       }
-      
+
       updateCountdown();
       setInterval(updateCountdown, 1000);
     }
-    
+
     startCountdown();
     
     gsap.registerPlugin(ScrollTrigger);
@@ -320,6 +617,24 @@
         transform: translateY(-5px);
       }
 
+      @media (min-width: 769px) and (max-width: 1010px) {
+        /* In this range, the digits got too wide for 4-across at
+           minmax(220px,...) but the page is wider than the mobile
+           breakpoint -- auto-fit would otherwise settle into an
+           awkward 3-column wrap. Force a clean 2x2 grid instead,
+           sized a bit larger than the phone version since there's
+           more room to work with. */
+        .countdown-timer {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: clamp(24px, 3vw, 36px) !important;
+          max-width: 640px !important;
+        }
+
+        .countdown-digit {
+          height: clamp(60px, 8vw, 80px) !important;
+        }
+      }
+
       @media (max-width: 768px) {
         .countdown-title {
           font-size: clamp(28px, 7vw, 42px) !important;
@@ -333,17 +648,21 @@
         
         .countdown-timer {
           grid-template-columns: repeat(2, 1fr) !important;
-          gap: clamp(10px, 2vw, 20px) !important;
+          gap: clamp(14px, 3vw, 28px) !important;
           max-width: 100% !important;
           padding: 0 10px;
         }
         
         .countdown-box {
-          padding: clamp(12px, 3vw, 20px) clamp(10px, 2vw, 15px) !important;
+          padding: clamp(20px, 5vw, 32px) clamp(16px, 3vw, 24px) !important;
         }
         
         .countdown-number {
-          font-size: clamp(28px, 8vw, 40px) !important;
+          font-size: clamp(40px, 12vw, 60px) !important;
+        }
+
+        .countdown-digit {
+          height: clamp(40px, 12vw, 60px) !important;
         }
         
         .countdown-message {
@@ -522,6 +841,108 @@ splitTypesss.forEach((char,i) => {
       stagger: 0.0175
     })
   })
+
+
+/* ============================================================
+   COMPETITIONS — FOREST PATHWAY SCATTER
+   Rocks alternate left/right down the stage like stepping stones
+   on a winding path, each one a little further down than the
+   last. left% is kept within roughly 26-36% (left side) and
+   64-74% (right side).
+
+   Each rock's hover tooltip opens AWAY from center (left rock ->
+   tooltip further left, right rock -> tooltip further right),
+   which needs real room between the rock and the true page edge
+   to avoid clipping off-screen. 26% inset is a deliberate
+   tradeoff: it's wider/more spread-out than the fully-safe 30%+
+   floor, accepting that the tooltip can clip on unusually narrow
+   desktop browser windows (below ~790px wide) in exchange for a
+   visually wider path on normal screens. Touch devices are
+   unaffected — the ≤700px breakpoint below switches tooltips to
+   a centered-under-the-rock layout regardless of side.
+
+   Edit top/left/size/z by hand to art-direct the path; this is
+   intentionally not auto-generated at runtime so the layout
+   stays exactly where you put it. If you widen the inset further
+   below ~26%, expect the overflow-safe viewport threshold to
+   climb fast — re-check before shipping.
+   ============================================================ */
+const COMPETITIONS = [
+  { file: "Band",           label: "Band",                desc: "Bands bring full-stage energy, battling it out for the loudest cheer in the house.",            top: 3.3,  left: 26.3, size: 14.3, z: 3 },
+  { file: "VocalGroup",     label: "Vocal Group",         desc: "Harmonies collide as vocal ensembles take the stage together.",                                 top: 7.6,  left: 66.2, size: 10.9, z: 2 },
+  { file: "SoloSinging",    label: "Solo Singing",        desc: "One voice, one stage — solo singers go all in for the spotlight.",                              top: 13.9, left: 32.8, size: 15,   z: 4 },
+  { file: "Monolog",        label: "Monolog",             desc: "A single performer, a single story, told with everything they've got.",                          top: 19.4, left: 64.9, size: 9.5,  z: 1 },
+  { file: "MembacaPuisi",   label: "Membaca Puisi",       desc: "Poetry reading competition celebrating rhythm, emotion, and delivery.",                          top: 23.5, left: 26.3, size: 12.2, z: 2 },
+  { file: "EnglishSpeech",  label: "English Speech",      desc: "Speakers take the floor to persuade, inform, and inspire in English.",                           top: 28.2, left: 69.1, size: 12.9, z: 3 },
+  { file: "MUN",            label: "MUN",                 desc: "Model United Nations — delegates debate global issues with diplomacy and wit.",                  top: 32.9, left: 28.0, size: 10.9, z: 2 },
+  { file: "Chess",          label: "Chess",               desc: "Sixty-four squares, endless strategy. May the sharpest mind win.",                               top: 39.5, left: 69.4, size: 16.3, z: 5 },
+  { file: "MD",             label: "Mobile Dev",          desc: "Builders and coders compete to ship the sharpest mobile creations.",                             top: 43.7, left: 31.9, size: 9.5,  z: 1 },
+  { file: "ML",             label: "Mobile Legends",      desc: "Squads clash in Mobile Legends: Bang Bang for esports glory.",                                   top: 50.2, left: 64.1, size: 14.3, z: 3 },
+  { file: "Basket",         label: "Basketball",          desc: "Fast breaks, full courts, and the chase for the winning basket.",                                top: 55.4, left: 33.0, size: 12.2, z: 2 },
+  { file: "Futsal",         label: "Futsal",              desc: "Five-a-side football at full speed in a tighter, faster arena.",                                 top: 59.4, left: 65.6, size: 10.9, z: 2 },
+  { file: "Floorball",      label: "Floorball",           desc: "Fast sticks and faster feet — floorball brings the floor to life.",                              top: 66.1, left: 29.4, size: 12.9, z: 3 },
+  { file: "Bulutangkis",    label: "Bulutangkis",         desc: "Badminton rallies test reflex, footwork, and nerve.",                                            top: 69.2, left: 65.0, size: 9.5,  z: 1 },
+  { file: "Photography",   label: "Photography",         desc: "Capturing the moment, one frame at a time.",                                                    top: 76.2, left: 32.0, size: 15,   z: 4 },
+  { file: "Drawing",        label: "Drawing",             desc: "Traditional drawing competition showcasing raw artistic skill.",                                 top: 81.2, left: 71.3, size: 10.9, z: 2 },
+  { file: "DigitalDrawing", label: "Digital Drawing",     desc: "Tablets and styluses replace pencils in this digital art showdown.",                             top: 85.8, left: 35.7, size: 12.2, z: 2 },
+  { file: "MonSoonSim",     label: "MonSoonSim",          desc: "A business simulation competition testing strategy under pressure.",                            top: 90.5, left: 69.5, size: 9.5,  z: 1 },
+  { file: "CCA",            label: "CCA",                 desc: "Cross-category showcase honoring Sylvara's extracurricular spirit.",                            top: 96.8, left: 32.2, size: 10.9, z: 2 },
+];
+
+function buildRockScatter() {
+  const stage = document.getElementById('rockScatter');
+  if (!stage) return;
+  stage.innerHTML = '';
+
+  COMPETITIONS.forEach((comp) => {
+    const rock = document.createElement('button');
+    rock.className = 'rock';
+    rock.type = 'button';
+    rock.setAttribute('aria-label', comp.label);
+
+    rock.style.top = `${comp.top}%`;
+    rock.style.left = `${comp.left}%`;
+    rock.style.width = `${comp.size}%`;
+    rock.style.zIndex = String(comp.z);
+    // subtle depth cue: lower z reads slightly smaller/duller,
+    // higher z slightly larger/sharper, without needing real 3D
+    const depthScale = 0.9 + (comp.z * 0.04);
+    rock.style.setProperty('--depth-scale', depthScale);
+
+    const img = document.createElement('img');
+    img.src = `assets/img/Stone/${comp.file}.png`;
+    img.alt = comp.label;
+    img.loading = 'lazy';
+
+    const label = document.createElement('span');
+    label.className = 'rock-label';
+    label.textContent = comp.label;
+
+    // Hover tooltip, anchored to this specific rock. Rocks on the
+    // left half of the path (left% < 50) open their tooltip to the
+    // right, toward the center; rocks on the right half open theirs
+    // to the left — so the card always reads inward and never gets
+    // clipped by the viewport edge.
+    const tooltip = document.createElement('div');
+    tooltip.className = `rock-tooltip ${comp.left < 50 ? 'side-left' : 'side-right'}`;
+
+    const tooltipTitle = document.createElement('h3');
+    tooltipTitle.textContent = comp.label;
+
+    const tooltipDesc = document.createElement('p');
+    tooltipDesc.textContent = comp.desc;
+
+    tooltip.appendChild(tooltipTitle);
+    tooltip.appendChild(tooltipDesc);
+
+    rock.appendChild(img);
+    rock.appendChild(label);
+    rock.appendChild(tooltip);
+    stage.appendChild(rock);
+  });
+}
+
+buildRockScatter();
 
 </script>
 </body>
