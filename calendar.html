@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>FORTELATIONS 2026: SYLVARA</title>
+  <meta content="" name="description">
+  <meta content="FORTELATIONS" name="keywords">
+
+  <link href="assets/img/favicon.webp" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
+
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       BACKGROUND FIX (carried over from index.html)
+       Keeps any fixed-position background art visible behind the
+       whole page rather than scoped only to its own section.
+       ============================================================ */
+    .parallaxbackground {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       CALENDAR HERO
+       Fountain background image, full hero height, with an
+       "EVENT CALENDAR" title using the same gentle float animation
+       index.html uses on its logo (logo-float keyframes further
+       down in this file).
+       ============================================================ */
+    #hero.calendar-hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin: 0;
+      padding: 80px 0 0;
+      background: none;
+    }
+
+    .calendar-hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0;
+    }
+
+    .calendar-hero-title {
+      position: relative;
+      z-index: 1;
+      font-family: 'Cinzel', serif;
+      font-weight: 800;
+      font-size: clamp(36px, 7vw, 84px);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #FCDD8B;
+      text-shadow: 0 0 15px #B8BE49, 0 0 35px rgba(239, 157, 109, 0.5);
+      text-align: center;
+      padding: 0 20px;
+      animation: logo-float 3s ease-in-out infinite;
+    }
+
+    @keyframes logo-float {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.02);
+      }
+    }
+
+    /* ============================================================
+       CALENDAR SECTION — HORIZONTAL SCROLL GALLERY
+       Modeled on the landonorris.com gallery pattern: normal
+       vertical page scroll gets translated into horizontal motion
+       for a row of plank cards. GSAP's ScrollTrigger pin:true (set
+       up in the script at the bottom of this file) holds the
+       section in place for the scroll duration while an inner
+       track scrubs horizontally — not CSS position:sticky, since
+       running both at once tends to fight each other.
+       ============================================================ */
+    .calendar-section {
+      position: relative;
+      width: 100%;
+      /* water-teal sampled from BACKGROUND_FOUNTAIN.jpg's stream */
+      background-color: #2F6B63;
+      overflow: hidden;
+    }
+
+    /* ============================================================
+       CALENDAR BACKGROUND — HORIZONTAL PARALLAX
+       calendar_sketch.png is 3840x1080, intentionally sized wider
+       than any single viewport so it has real room to drift
+       sideways without ever exposing a transparent/empty edge.
+
+       IMPORTANT: this element lives INSIDE .calendar-track-outer
+       (not directly inside .calendar-section), specifically so its
+       height:100% resolves against .calendar-track-outer's
+       guaranteed, explicit height:100vh/100dvh. .calendar-section
+       itself has no explicit height -- its size comes entirely
+       from its pinned child via ScrollTrigger -- so height:100%
+       there was resolving ambiguously (often to a near-zero value
+       before the pin engaged), which made the background render
+       at a tiny fraction of its correct width. Moving it inside
+       the height-guaranteed wrapper fixes that at the source.
+
+       It's translated at a SLOWER rate than the plank track via
+       its own entry in the same GSAP timeline below -- same
+       depth-layer trick as the Competitions section's vertical
+       background drift, just rotated to horizontal here since this
+       section scrolls sideways instead of down.
+       ============================================================ */
+    .calendar-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: auto;
+      min-width: 100%;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    .calendar-track-outer {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .calendar-track {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      flex-shrink: 0;
+      /* width is set explicitly via JS once plank positions are
+         known, since absolutely-positioned children don't expand
+         a parent's natural width the way flex children do */
+      will-change: transform;
+    }
+
+    .plank-card {
+      position: absolute;
+      top: 50%;
+      flex: 0 0 auto;
+      width: clamp(220px, 22vw, 320px);
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .plank-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35)) drop-shadow(0 0 18px rgba(252, 221, 139, 0.55)) drop-shadow(0 0 32px rgba(184, 190, 73, 0.35));
+      transition: filter 0.3s ease, transform 0.3s ease;
+    }
+
+    .plank-card {
+      cursor: pointer;
+    }
+
+    .plank-card:hover img,
+    .plank-card:focus-visible img {
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 24px rgba(252, 221, 139, 0.8)) drop-shadow(0 0 44px rgba(184, 190, 73, 0.5));
+      transform: scale(1.05);
+    }
+
+    .plank-card span {
+      position: relative;
+      z-index: 1;
+      font-family: 'Cinzel', serif;
+      font-weight: 800;
+      font-size: clamp(15px, 1.6vw, 20px);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #4A2E17;
+      text-align: center;
+      padding: 0 18%;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+    }
+
+    /* ============================================================
+       PLANK DETAIL PANEL
+       Shown on click: title, description, and a live countdown to
+       that plank's date using the same custom digit-image style as
+       the homepage countdown (assets/img/Numbers/0-9.png).
+       ============================================================ */
+    .plank-detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 30, 28, 0.78);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 24px;
+    }
+
+    .plank-detail-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .plank-detail-card {
+      position: relative;
+      background: rgba(20, 38, 34, 0.95);
+      border: 2px solid rgba(252, 221, 139, 0.45);
+      border-radius: 26px;
+      max-width: 480px;
+      width: 100%;
+      padding: 44px 36px 40px;
+      text-align: center;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+      transform: translateY(24px) scale(0.96);
+      transition: transform 0.35s ease;
+    }
+
+    .plank-detail-overlay.active .plank-detail-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .plank-detail-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 800;
+      font-size: clamp(24px, 4.5vw, 34px);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #FCDD8B;
+      text-shadow: 0 0 14px #B8BE49;
+      margin: 0 0 12px;
+    }
+
+    .plank-detail-desc {
+      font-family: 'Open Sans', sans-serif;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 15px;
+      line-height: 1.6;
+      margin: 0 0 28px;
+    }
+
+    .plank-countdown {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(10px, 2vw, 18px);
+    }
+
+    .plank-countdown-unit {
+      background: rgba(252, 221, 139, 0.08);
+      border: 1px solid rgba(252, 221, 139, 0.25);
+      border-radius: 14px;
+      padding: 16px 6px;
+    }
+
+    .plank-countdown-digits {
+      display: flex;
+      justify-content: center;
+      gap: 3px;
+      margin-bottom: 6px;
+    }
+
+    .plank-countdown-digits img {
+      height: clamp(34px, 6.5vw, 54px);
+      width: auto;
+      filter: drop-shadow(0 0 10px #B8BE49);
+    }
+
+    .plank-countdown-label {
+      display: block;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: clamp(9px, 1.2vw, 11px);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #FCDD8B;
+    }
+
+    .plank-countdown-passed {
+      font-family: 'Open Sans', sans-serif;
+      color: #FCDD8B;
+      font-weight: 700;
+      font-size: 16px;
+      margin: 4px 0 0;
+    }
+
+    .plank-detail-close {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+      height: auto !important;
+      padding: 0 !important;
+      color: #FCDD8B;
+      font-size: 30px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .plank-detail-close:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <header id="header" class="fixed-top d-flex align-items-center header-transparent header">
+    <div class="container d-flex align-items-center justify-content-between">
+
+      <div class="logo">
+        <a href="index.html"><img src="assets/img/navbar-logo.webp" alt="" class="img-fluid"></a>
+      </div>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link scrollto" href="index.html">Home</a></li>
+          <li><a class="nav-link scrollto" href="#competitions">Competitions</a></li>
+          <li><a class="nav-link scrollto" href="about.html">About</a></li>
+          <li><a class="nav-link scrollto active" href="calendar.html">Calendar</a></li>
+          <li><a href="https://regist.fortelations.com/"><button>Registration</button></a></li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
+    </div>
+  </header>
+
+  <section id="hero" class="calendar-hero">
+    <img src="assets/img/BACKGROUND_FOUNTAIN.jpg" class="calendar-hero-bg" loading="lazy" alt="">
+    <h1 class="calendar-hero-title">Event Calendar</h1>
+  </section>
+
+  <section class="calendar-section" id="calendarSection">
+    <div class="calendar-track-outer">
+      <img src="assets/img/calendar_sketch.png" class="calendar-bg" id="calendarBg" loading="lazy" alt="">
+      <div class="calendar-track" id="calendarTrack">
+        <!-- plank cards generated by JS below from the PLANKS array -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Detail panel shown when a plank is clicked -->
+  <div class="plank-detail-overlay" id="plankOverlay">
+    <div class="plank-detail-card">
+      <button class="plank-detail-close" id="plankClose" aria-label="Close">&times;</button>
+      <h3 class="plank-detail-title" id="plankDetailTitle"></h3>
+      <p class="plank-detail-desc" id="plankDetailDesc"></p>
+
+      <div class="plank-countdown" id="plankCountdown">
+        <div class="plank-countdown-unit">
+          <div class="plank-countdown-digits" id="plankDays"></div>
+          <span class="plank-countdown-label">Days</span>
+        </div>
+        <div class="plank-countdown-unit">
+          <div class="plank-countdown-digits" id="plankHours"></div>
+          <span class="plank-countdown-label">Hours</span>
+        </div>
+        <div class="plank-countdown-unit">
+          <div class="plank-countdown-digits" id="plankMinutes"></div>
+          <span class="plank-countdown-label">Minutes</span>
+        </div>
+        <div class="plank-countdown-unit">
+          <div class="plank-countdown-digits" id="plankSeconds"></div>
+          <span class="plank-countdown-label">Seconds</span>
+        </div>
+      </div>
+      <p class="plank-countdown-passed" id="plankCountdownPassed" style="display:none;">This day has already arrived!</p>
+    </div>
+  </div>
+
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-left">
+          <video src="assets/img/rusa-loop.webm" class="footer-favicon" autoplay loop muted playsinline></video>
+        </div>
+        <div class="footer-center">
+          <img src="assets/img/Sylvara.webp" class="footer-center-logo">
+        </div>
+        <div class="footer-right">
+          <div class="social-media-icons">
+            <a href="https://www.instagram.com/fortelations/?hl=en" target="_blank"><i class='bx bxl-instagram'></i></a>
+            <a href="https://www.tiktok.com/@fortelations" target="_blank"><i class='bx bxl-tiktok'></i></a>
+            <a href="https://www.youtube.com/@smak7penabur" target="_blank"><i class='bx bxl-youtube'></i></a>
+            <a href="mailto:aksenfortelations@gmail.com"><i class='bx bx-envelope'></i></a>
+          </div>
+          <div class="footer-contact">
+            <p class="contact-name">Nathanael Edgar</p>
+            <p class="contact-whatsapp"><a href="https://wa.me/628125000318"><i class='bx bxl-whatsapp'></i> +62 812-5000-318</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; Copyright <strong><span>Fortelation</span></strong> 2026. All Rights Reserved
+      </div>
+    </div>
+  </footer>
+
+  
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <div id="preloader"></div>
+
+  
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@latest"></script>
+  <script src="https://unpkg.com/split-type"></script>
+    
+  <script src="assets/js/main.js"></script>
+<script>
+  /* ============================================================
+     SMOOTH SCROLL (Lenis) — same setup as the rest of the site
+     ============================================================ */
+  const lenis = new Lenis({ lerp: 0.15, wheelMultiplier: 1.82 });
+  window.lenis = lenis;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  lenis.on('scroll', () => ScrollTrigger.update());
+
+  gsap.ticker.add((time) => {
+    lenis.raf(time * 1000);
+  });
+
+  /* ============================================================
+     CALENDAR — HORIZONTAL SCROLL GALLERY, SCATTERED
+     Same pattern as landonorris.com's gallery: vertical scroll
+     progress drives a horizontal translateX on the inner track via
+     GSAP ScrollTrigger pin+scrub, so the planks slide sideways
+     instead of the page continuing to scroll down past them.
+
+     Unlike the Competitions rock scatter (which uses percentage
+     coordinates so the SAME composition scales across screen
+     sizes), this track scrolls horizontally as one rigid unit —
+     there's no equivalent "different screen width" problem, since
+     the whole thing just travels further/shorter based on its own
+     real pixel width regardless of viewport. So plank positions
+     here are plain px offsets, which is simpler and doesn't need
+     the same percentage-based approach.
+
+     x: horizontal position of each plank's center, in px, along
+        the scrolling track (must stay in ascending order so the
+        scroll reads left-to-right correctly)
+     yOffset: vertical scatter offset from center, in px (negative
+        = up, positive = down) -- this is what gives the irregular,
+        rock-scatter-like feel instead of a single straight row
+     art: optional override for which plank PNG to use; defaults to
+        alternating plank1/plank2 if omitted
+     ============================================================ */
+  const PLANKS = [
+    { label: "Technical Meeting", x: 480,  yOffset: -4,  date: "September 1, 2026",  desc: "Coordinators and team representatives align on rules, schedules, and logistics ahead of the festival." },
+    { label: "Opening",           x: 940,  yOffset: -68, date: "September 2, 2026",  desc: "Sylvara officially begins — opening ceremony, welcome address, and the first taste of festival energy." },
+    { label: "Day 1",             x: 1400, yOffset: 44,  date: "September 3, 2026",  desc: "The first full day of competitions kicks off across every category." },
+    { label: "Day 2",             x: 1860, yOffset: -40, date: "September 4, 2026",  desc: "Competitions continue, with new categories taking the stage." },
+    { label: "Day 3",             x: 2320, yOffset: 71,  date: "September 5, 2026",  desc: "Midway through the festival — more heats, more performances, more energy." },
+    { label: "Day 4",             x: 2780, yOffset: -53, date: "September 6, 2026",  desc: "Competitions roll on as finalists begin to emerge across several categories." },
+    { label: "Day 5",             x: 3240, yOffset: 9,   date: "September 7, 2026",  desc: "The penultimate stretch — semifinals and standout showcases." },
+    { label: "Day 6",             x: 3700, yOffset: -70, date: "September 8, 2026",  desc: "Final competitions wrap up as the festival builds toward its close." },
+    { label: "Day 7",             x: 4160, yOffset: 39,  date: "September 9, 2026",  desc: "The last full day of competition before Sylvara closes its gates." },
+    { label: "Closing",           x: 4620, yOffset: -22, date: "September 10, 2026", desc: "Awards, farewells, and a final celebration as Sylvara 2026 comes to a close." },
+  ];
+
+  // Extra right-edge padding so the last plank's hover/scatter room
+  // and the track's measured width don't feel cut off right at the
+  // final card
+  const TRACK_END_PADDING = 300;
+
+  function buildCalendarTrack() {
+    const track = document.getElementById('calendarTrack');
+    if (!track) return;
+    track.innerHTML = '';
+
+    PLANKS.forEach((plank, i) => {
+      const art = plank.art || (i % 2 === 0 ? 'plank1.png' : 'plank2.png');
+
+      const card = document.createElement('div');
+      card.className = 'plank-card';
+      card.style.left = `${plank.x}px`;
+      card.style.transform = `translate(-50%, calc(-50% + ${plank.yOffset}px))`;
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', plank.label);
+
+      const img = document.createElement('img');
+      img.src = `assets/img/${art}`;
+      img.alt = plank.label;
+      img.loading = 'lazy';
+
+      const label = document.createElement('span');
+      label.textContent = plank.label;
+
+      card.appendChild(img);
+      card.appendChild(label);
+      track.appendChild(card);
+
+      card.addEventListener('click', () => openPlankDetail(plank));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openPlankDetail(plank);
+        }
+      });
+    });
+
+    // explicit width needed: absolutely-positioned children don't
+    // expand a parent's natural scrollWidth the way flex children
+    // would, so it has to be calculated and set directly here
+    const lastPlank = PLANKS[PLANKS.length - 1];
+    const trackWidth = lastPlank.x + TRACK_END_PADDING;
+    track.style.width = `${trackWidth}px`;
+  }
+
+  buildCalendarTrack();
+
+  /* ----------------------------------------------------------------
+     PLANK DETAIL PANEL + COUNTDOWN
+     Opens on click with the plank's title/description, plus a live
+     countdown to its date rendered with the same digit-image style
+     (assets/img/Numbers/0.png - 9.png) as the homepage countdown.
+     Each open swaps in fresh digit elements and starts its own
+     interval; the previous interval is cleared on close (or before
+     a new plank opens) so multiple timers never stack up running
+     in the background.
+     ---------------------------------------------------------------- */
+  let plankCountdownInterval = null;
+  const plankDigitState = {};
+
+  function setPlankDigit(containerId, value) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const str = String(value).padStart(2, '0');
+
+    [...str].forEach((digit, i) => {
+      const slotKey = `${containerId}-${i}`;
+      let img = container.children[i];
+      if (!img) {
+        img = document.createElement('img');
+        img.alt = digit;
+        container.appendChild(img);
+      }
+      if (plankDigitState[slotKey] === digit) return;
+      plankDigitState[slotKey] = digit;
+      img.src = `assets/img/Numbers/${digit}.png`;
+      img.alt = digit;
+    });
+  }
+
+  function startPlankCountdown(targetDateStr) {
+    if (plankCountdownInterval) clearInterval(plankCountdownInterval);
+
+    const targetDate = new Date(`${targetDateStr} 00:00:00`).getTime();
+    const countdownEl = document.getElementById('plankCountdown');
+    const passedEl = document.getElementById('plankCountdownPassed');
+
+    function tick() {
+      const now = Date.now();
+      const distance = targetDate - now;
+
+      if (distance <= 0) {
+        countdownEl.style.display = 'none';
+        passedEl.style.display = 'block';
+        clearInterval(plankCountdownInterval);
+        return;
+      }
+
+      countdownEl.style.display = 'grid';
+      passedEl.style.display = 'none';
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setPlankDigit('plankDays', days);
+      setPlankDigit('plankHours', hours);
+      setPlankDigit('plankMinutes', minutes);
+      setPlankDigit('plankSeconds', seconds);
+    }
+
+    tick();
+    plankCountdownInterval = setInterval(tick, 1000);
+  }
+
+  function openPlankDetail(plank) {
+    document.getElementById('plankDetailTitle').textContent = plank.label;
+    document.getElementById('plankDetailDesc').textContent = plank.desc || '';
+    document.getElementById('plankOverlay').classList.add('active');
+    startPlankCountdown(plank.date);
+  }
+
+  function closePlankDetail() {
+    document.getElementById('plankOverlay').classList.remove('active');
+    if (plankCountdownInterval) {
+      clearInterval(plankCountdownInterval);
+      plankCountdownInterval = null;
+    }
+  }
+
+  document.getElementById('plankClose')?.addEventListener('click', closePlankDetail);
+  document.getElementById('plankOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'plankOverlay') closePlankDetail();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePlankDetail();
+  });
+
+  /* ----------------------------------------------------------------
+     PIN + HORIZONTAL SCRUB
+     The outer wrapper (.calendar-section) needs real scroll height
+     to provide runway for the horizontal sweep -- ScrollTrigger's
+     `pin` handles holding .calendar-track-outer in place for that
+     entire distance, then releases it once the track has fully
+     scrolled past.
+     ---------------------------------------------------------------- */
+  function setupCalendarScroll() {
+    const section = document.querySelector('.calendar-section');
+    const track = document.getElementById('calendarTrack');
+    const bg = document.getElementById('calendarBg');
+    if (!section || !track) return;
+
+    // track.style.width was set explicitly in buildCalendarTrack(),
+    // so offsetWidth reflects that real measured value here
+    const trackWidth = track.offsetWidth;
+    const viewportWidth = window.innerWidth;
+    const travelDistance = Math.max(0, trackWidth - viewportWidth);
+
+    // scroll distance the page needs to provide this horizontal
+    // motion: tying it to travelDistance keeps the horizontal speed
+    // feeling consistent regardless of how many planks there are
+    // small buffer so the pin doesn't release the instant the last
+    // plank reaches position -- kept intentionally small now, since
+    // a larger buffer here reads as a dead/blank pause before the
+    // footer (especially noticeable on mobile, where scroll gestures
+    // are shorter and the pause is more perceptible)
+    const scrollDistance = travelDistance + window.innerHeight * 0.08;
+
+    // Background parallax: calendar_sketch.png is rendered at
+    // height:100% with width:auto, so its actual on-screen width
+    // depends on its own aspect ratio (3840:1080) times the
+    // viewport height -- measuring it directly (rather than
+    // assuming a fixed px value) means this stays correct at any
+    // screen size. Its safe travel distance is whatever's left
+    // over once it's covered the viewport width, capped well
+    // under that so it never runs out of image and shows an edge.
+    let bgTravelDistance = 0;
+    if (bg) {
+      const bgRenderedWidth = bg.offsetWidth;
+      const bgMaxTravel = Math.max(0, bgRenderedWidth - viewportWidth);
+      // move at roughly 40% of the foreground's speed for a sense
+      // of depth, but never more than the background actually has
+      // room to travel
+      bgTravelDistance = Math.min(bgMaxTravel, travelDistance * 0.4);
+    }
+
+    ScrollTrigger.getAll().forEach(st => {
+      if (st.vars.id === 'calendarPin') st.kill();
+    });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        id: 'calendarPin',
+        trigger: section,
+        start: 'top top',
+        end: () => `+=${scrollDistance}`,
+        scrub: 1,
+        pin: true,
+        invalidateOnRefresh: true,
+      }
+    });
+
+    tl.to(track, { x: -travelDistance, ease: 'none' }, 0);
+    if (bg) {
+      tl.to(bg, { x: -bgTravelDistance, ease: 'none' }, 0);
+    }
+  }
+
+  // Wait for plank images to load before measuring scrollWidth,
+  // since untouched <img> elements report 0 width before loading
+  window.addEventListener('load', () => {
+    setupCalendarScroll();
+    ScrollTrigger.refresh();
+  });
+
+  let calendarResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(calendarResizeTimer);
+    calendarResizeTimer = setTimeout(() => {
+      setupCalendarScroll();
+      ScrollTrigger.refresh();
+    }, 250);
+  });
+</script>
+</body>
+
+</html>
