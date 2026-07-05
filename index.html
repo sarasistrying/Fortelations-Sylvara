@@ -113,6 +113,27 @@
       margin: 0 0 8px;
     }
 
+    /* ============================================================
+       CUSTOM IMAGE HEADINGS (Competition.png / Countdown.png)
+       These PNGs have large transparent canvas areas above and
+       below the actual text (content is only ~21-27% of canvas
+       height). Negative vertical margins pull out that dead space
+       so the headings don't create a large visual gap. Adjust
+       the margin values if the canvas proportions change.
+       ============================================================ */
+    .section-heading-img {
+      display: block;
+      width: min(80vw, 820px) !important;
+      max-width: none !important;
+      height: auto !important;
+      margin: -12% auto -12%;
+      filter:
+        drop-shadow(0 8px 24px rgba(0, 0, 0, 0.75))
+        drop-shadow(0 2px 8px rgba(0, 0, 0, 0.9))
+        drop-shadow(0 0 12px rgba(239, 157, 109, 0.4));
+      animation: logo-float 3s ease-in-out infinite;
+    }
+
     .competitions-heading p {
       font-family: 'Open Sans', sans-serif;
       font-size: clamp(13px, 1.6vw, 16px);
@@ -361,10 +382,7 @@
 
     <section id="about" class="about countdown-section" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px 50px;">
 
-      <div class="countdown-logo-container" style="margin-bottom: -100px; display: flex; justify-content: center; align-items: center; width: 100%;">
-        <img src="assets/img/Sylvara.webp" class="countdown-sylvara-logo" style="max-width: min(90vw, 800px); width: 100%; height: auto; filter: drop-shadow(0 0 20px rgba(184, 190, 73, 0.6)) drop-shadow(0 0 40px rgba(239, 157, 109, 0.4));" alt="Sylvara Logo" loading="lazy">
-      </div>
-
+      <img src="assets/img/headings/Countdown.png" class="section-heading-img" alt="Countdown" loading="lazy">
 
       <div class="countdown-timer" id="countdown" style="
         display: grid;
@@ -486,7 +504,7 @@
       <img src="assets/img/comp sketch.png" class="competitions-bg" loading="lazy" alt="">
 
       <div class="competitions-heading">
-        <h2>Competitions</h2>
+        <img src="assets/img/headings/Competition.png" class="section-heading-img" alt="Competitions" loading="lazy">
         <p>Every stone marks a battlefield of its own.</p>
       </div>
 
@@ -597,23 +615,6 @@
     // Scroll animation from hero to countdown
     
     const resplendentLogo = document.querySelector('.resplendent');
-    const countdownLogo = document.querySelector('.countdown-sylvara-logo');
-    
-    if (resplendentLogo && countdownLogo) {
-      gsap.from(countdownLogo, {
-        scrollTrigger: {
-          trigger: '#about',
-          start: 'top 80%',
-          end: 'top 20%',
-          scrub: 1,
-          markers: false
-        },
-        y: -window.innerHeight * 1.5,
-        opacity: 0,
-        scale: 0.5,
-        duration: 1
-      });
-    }
 
     // Add CSS animations
     const style = document.createElement('style');
@@ -634,10 +635,6 @@
         50% {
           transform: scale(1.02);
         }
-      }
-      
-      .countdown-sylvara-logo {
-        animation: logo-float 3s ease-in-out infinite;
       }
       
       @keyframes pulse {
@@ -711,12 +708,6 @@
       @media (max-width: 480px) {
         .countdown-section {
           padding: 60px 12px 30px !important;
-        }
-        .countdown-logo-container {
-          margin-bottom: 10px !important;
-        }
-        .countdown-sylvara-logo {
-          max-width: 85vw !important;
         }
       }
     `;
