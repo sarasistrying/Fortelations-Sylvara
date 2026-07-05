@@ -75,24 +75,6 @@
       z-index: 0;
     }
 
-    .calendar-heading {
-      position: relative;
-      z-index: 3;
-      text-align: center;
-      padding: 80px 20px 20px;
-    }
-
-    .calendar-heading h2 {
-      font-family: 'Cinzel', serif;
-      font-weight: 800;
-      font-size: clamp(28px, 5vw, 48px);
-      color: #FCDD8B;
-      text-shadow: 0 0 12px #B8BE49, 0 0 30px rgba(239, 157, 109, 0.35);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin: 0;
-    }
-
     .calendar-hero-title {
       position: relative;
       z-index: 1;
@@ -118,113 +100,160 @@
     }
 
     /* ============================================================
-       CALENDAR SECTION — VERTICAL PATHWAY SCATTER
-       Same approach as the Competitions rock-scatter on index.html:
-       planks are placed at percentage top/left coordinates within a
-       tall vertical stage so the layout is identical on every
-       screen size (scales as a unit rather than reflowing).
-       Left column: 26-36%, Right column: 64-74% alternating path.
+       CALENDAR SECTION — HORIZONTAL SCROLL GALLERY
+       Modeled on the landonorris.com gallery pattern: normal
+       vertical page scroll gets translated into horizontal motion
+       for a row of plank cards. GSAP's ScrollTrigger pin:true (set
+       up in the script at the bottom of this file) holds the
+       section in place for the scroll duration while an inner
+       track scrubs horizontally — not CSS position:sticky, since
+       running both at once tends to fight each other.
        ============================================================ */
     .calendar-section {
       position: relative;
-      z-index: 2;
       width: 100%;
+      /* water-teal sampled from BACKGROUND_FOUNTAIN.jpg's stream */
+      background-color: #2F6B63;
       overflow: hidden;
-      padding-bottom: 120px;
     }
 
+    /* ============================================================
+       CALENDAR BACKGROUND — TRAVELS WITH THE PLANKS (1:1)
+       calendar_sketch.png is 4920x1080 -- painted wide enough to
+       cover the plank track's FULL travel distance, since the
+       background moves in lockstep with the planks (same x target,
+       same speed) rather than a slower parallax layer. The result
+       reads as one continuous painted stream the user travels
+       along, same idea as the Competitions section's long vertical
+       scroll-through background, just rotated to horizontal here.
+
+       IMPORTANT: width is forced to a fixed 4920px (with
+       !important + max-width:none !important) rather than letting
+       it derive from height. style.css has a global
+       `img { max-width: 100%; height: auto }` rule that otherwise
+       silently caps any img's width at its container's width --
+       on this section that meant the background rendered at
+       roughly viewport-width instead of its real 4920px, which is
+       exactly why it looked "stuck"/cut off mid-scroll. This is
+       the THIRD time a global style.css rule (button height/
+       box-shadow, img max-width) has silently overridden sizing on
+       this site without an obvious error -- if something looks
+       sized wrong here in the future and nothing in this file
+       explains it, check style.css's global element selectors
+       (button, img, etc.) first.
+
+       calendar_sketch.png is 4920x1080 -- painted wide enough to
+       cover the plank track's FULL travel distance, since the
+       background moves in lockstep with the planks (same x target,
+       same speed) rather than a slower parallax layer. The result
+       reads as one continuous painted stream the user travels
+       along, same idea as the Competitions section's long vertical
+       scroll-through background, just rotated to horizontal here.
+
+       If the plank count/spacing ever changes (see PLANKS array
+       and TRACK_END_PADDING further down), the required minimum
+       image width changes too -- the script logs a console.warn if
+       the rendered background is narrower than the track needs, so
+       check there first if this background ever looks like it's
+       running out of image partway through the scroll.
+
+       IMPORTANT: this element lives INSIDE .calendar-track-outer
+       (not directly inside .calendar-section), specifically so its
+       height:100% resolves against .calendar-track-outer's
+       guaranteed, explicit height:100vh/100dvh. .calendar-section
+       itself has no explicit height -- its size comes entirely
+       from its pinned child via ScrollTrigger -- so height:100%
+       there was resolving ambiguously (often to a near-zero value
+       before the pin engaged), which made the background render
+       at a tiny fraction of its correct width. Moving it inside
+       the height-guaranteed wrapper fixes that at the source.
+       ============================================================ */
     .calendar-bg {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100% !important;
+      width: 4920px !important;
       max-width: none !important;
       height: 100% !important;
       object-fit: cover;
-      object-position: top;
-      z-index: -1;
+      object-position: center;
+      z-index: 0;
       pointer-events: none;
+      will-change: transform;
     }
 
-    .plank-scatter {
+    .calendar-track-outer {
       position: relative;
-      width: 100%;
-      max-width: 1300px;
-      margin: 0 auto;
-      height: 420vh;
       z-index: 1;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .calendar-track {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      flex-shrink: 0;
+      /* width is set explicitly via JS once plank positions are
+         known, since absolutely-positioned children don't expand
+         a parent's natural width the way flex children do */
+      will-change: transform;
     }
 
     .plank-card {
-      position: absolute !important;
-      cursor: pointer !important;
-      border: none !important;
-      outline: none !important;
-      background: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      height: auto !important;
-      aspect-ratio: 1 / 1 !important;
-      font-size: 0 !important;
-      appearance: none !important;
-      -webkit-appearance: none !important;
-      -webkit-tap-highlight-color: transparent;
-      will-change: transform;
-      transform: translate(-50%, -50%) scale(var(--depth-scale, 1)) !important;
-      transition: transform 0.3s ease !important;
-    }
-
-    .plank-card:hover,
-    .plank-card:focus-visible {
-      transform: translate(-50%, -50%) scale(calc(var(--depth-scale, 1) * 1.06)) !important;
-    }
-
-    .plank-card:active {
-      transform: translate(-50%, -50%) scale(calc(var(--depth-scale, 1) * 1.06)) !important;
-      outline: none !important;
+      position: absolute;
+      top: 50%;
+      flex: 0 0 auto;
+      width: clamp(220px, 22vw, 320px);
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .plank-card img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: contain;
-      display: block;
-      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.45))
-              drop-shadow(0 0 18px rgba(252,221,139,0.5))
-              drop-shadow(0 0 32px rgba(184,190,73,0.3));
-      transition: filter 0.3s ease;
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35)) drop-shadow(0 0 18px rgba(252, 221, 139, 0.55)) drop-shadow(0 0 32px rgba(184, 190, 73, 0.35));
+      transition: filter 0.3s ease, transform 0.3s ease;
+    }
+
+    .plank-card {
+      cursor: pointer;
     }
 
     .plank-card:hover img,
     .plank-card:focus-visible img {
-      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5))
-              drop-shadow(0 0 24px rgba(252,221,139,0.8))
-              drop-shadow(0 0 44px rgba(184,190,73,0.5));
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 24px rgba(252, 221, 139, 0.8)) drop-shadow(0 0 44px rgba(184, 190, 73, 0.5));
+      transform: scale(1.05);
     }
 
     .plank-card span {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      position: relative;
       z-index: 1;
       font-family: 'Cinzel', serif;
       font-weight: 800;
-      font-size: clamp(13px, 1.5vw, 18px);
+      font-size: clamp(15px, 1.6vw, 20px);
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: #2C1205;
+      color: #4A2E17;
       text-align: center;
-      padding: 0 20%;
-      text-shadow:
-        0 0 8px rgba(255, 210, 60, 0.9),
-        0 0 16px rgba(255, 180, 20, 0.7),
-        0 0 28px rgba(255, 160, 0, 0.5);
-      pointer-events: none;
+      padding: 0 18%;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
     }
+
     /* ============================================================
        PLANK DETAIL PANEL
+       Shown on click: title, description, and a live countdown to
+       that plank's date using the same custom digit-image style as
+       the homepage countdown (assets/img/Numbers/0-9.png).
        ============================================================ */
     .plank-detail-overlay {
       position: fixed;
@@ -304,9 +333,8 @@
     }
 
     .plank-countdown-digits img {
-      height: clamp(34px, 6.5vw, 54px) !important;
-      max-width: none !important;
-      width: auto !important;
+      height: clamp(34px, 6.5vw, 54px);
+      width: auto;
       filter: drop-shadow(0 0 10px #B8BE49);
     }
 
@@ -383,13 +411,12 @@
   </section>
 
   <section class="calendar-section" id="calendarSection">
-    <img src="assets/img/calendar_sketch2.png" class="calendar-bg" id="calendarBg" loading="lazy" alt="">
-
-    <div class="calendar-heading">
-      <h2>Event Calendar</h2>
+    <div class="calendar-track-outer">
+      <img src="assets/img/calendar_sketch.png" class="calendar-bg" id="calendarBg" loading="lazy" alt="">
+      <div class="calendar-track" id="calendarTrack">
+        <!-- plank cards generated by JS below from the PLANKS array -->
+      </div>
     </div>
-
-    <div class="plank-scatter" id="plankScatter"></div>
   </section>
 
   <!-- Detail panel shown when a plank is clicked -->
@@ -469,56 +496,77 @@
   <script src="assets/js/main.js"></script>
 <script>
   /* ============================================================
-     CALENDAR PAGE — VERTICAL PATHWAY SCATTER
-     Mirrors the Competitions rock-scatter approach from index.html:
-     planks are placed at fixed percentage top/left coordinates so
-     the layout is identical on every screen size. No GSAP/Lenis
-     scroll-driven animation here -- just CSS-positioned planks
-     the user scrolls past naturally as the page scrolls down.
+     SMOOTH SCROLL (Lenis) — same setup as the rest of the site
+     ============================================================ */
+  const lenis = new Lenis({ lerp: 0.15, wheelMultiplier: 1.82 });
+  window.lenis = lenis;
 
-     Each plank entry carries:
-       label : display title shown on the plank
-       top   : % from top of .plank-scatter stage (420vh tall)
-       left  : % from left of stage (26-36% = left path, 64-74% = right path)
-       size  : plank width as % of stage width
-       z     : stacking depth (higher = "closer", slightly larger via --depth-scale)
-       date  : target date for the click-to-open countdown
-       desc  : description shown in the detail panel
-       art   : optional override for plank image; defaults to alternating plank1/plank2
-  ============================================================ */
+  gsap.registerPlugin(ScrollTrigger);
+
+  lenis.on('scroll', () => ScrollTrigger.update());
+
+  gsap.ticker.add((time) => {
+    lenis.raf(time * 1000);
+  });
+
+  /* ============================================================
+     CALENDAR — HORIZONTAL SCROLL GALLERY, SCATTERED
+     Same pattern as landonorris.com's gallery: vertical scroll
+     progress drives a horizontal translateX on the inner track via
+     GSAP ScrollTrigger pin+scrub, so the planks slide sideways
+     instead of the page continuing to scroll down past them.
+
+     Unlike the Competitions rock scatter (which uses percentage
+     coordinates so the SAME composition scales across screen
+     sizes), this track scrolls horizontally as one rigid unit —
+     there's no equivalent "different screen width" problem, since
+     the whole thing just travels further/shorter based on its own
+     real pixel width regardless of viewport. So plank positions
+     here are plain px offsets, which is simpler and doesn't need
+     the same percentage-based approach.
+
+     x: horizontal position of each plank's center, in px, along
+        the scrolling track (must stay in ascending order so the
+        scroll reads left-to-right correctly)
+     yOffset: vertical scatter offset from center, in px (negative
+        = up, positive = down) -- this is what gives the irregular,
+        rock-scatter-like feel instead of a single straight row
+     art: optional override for which plank PNG to use; defaults to
+        alternating plank1/plank2 if omitted
+     ============================================================ */
   const PLANKS = [
-    { label: "Technical Meeting", top: 3.3,  left: 32.9, size: 26, z: 3, date: "September 1, 2026",  desc: "Coordinators and team representatives align on rules, schedules, and logistics ahead of the festival." },
-    { label: "Opening",           top: 14.6, left: 72.5, size: 26, z: 3, date: "September 2, 2026",  desc: "Sylvara officially begins — opening ceremony, welcome address, and the first taste of festival energy." },
-    { label: "Day 1",             top: 23.1, left: 28.3, size: 26, z: 3, date: "September 3, 2026",  desc: "The first full day of competitions kicks off across every category." },
-    { label: "Day 2",             top: 32.9, left: 66.3, size: 26, z: 3, date: "September 4, 2026",  desc: "Competitions continue, with new categories taking the stage." },
-    { label: "Day 3",             top: 44.7, left: 27.3, size: 26, z: 3, date: "September 5, 2026",  desc: "Midway through the festival — more heats, more performances, more energy." },
-    { label: "Day 4",             top: 54.1, left: 66.1, size: 26, z: 3, date: "September 6, 2026",  desc: "Competitions roll on as finalists begin to emerge across several categories." },
-    { label: "Day 5",             top: 63.4, left: 30.3, size: 26, z: 3, date: "September 7, 2026",  desc: "The penultimate stretch — semifinals and standout showcases." },
-    { label: "Day 6",             top: 75.0, left: 70.1, size: 26, z: 3, date: "September 8, 2026",  desc: "Final competitions wrap up as the festival builds toward its close." },
-    { label: "Day 7",             top: 82.5, left: 28.8, size: 26, z: 3, date: "September 9, 2026",  desc: "The last full day of competition before Sylvara closes its gates." },
-    { label: "Closing",           top: 92.9, left: 72.7, size: 26, z: 3, date: "September 10, 2026", desc: "Awards, farewells, and a final celebration as Sylvara 2026 comes to a close." },
+    { label: "Technical Meeting", x: 480,  yOffset: -4,  date: "September 1, 2026",  desc: "Coordinators and team representatives align on rules, schedules, and logistics ahead of the festival." },
+    { label: "Opening",           x: 940,  yOffset: -68, date: "September 2, 2026",  desc: "Sylvara officially begins — opening ceremony, welcome address, and the first taste of festival energy." },
+    { label: "Day 1",             x: 1400, yOffset: 44,  date: "September 3, 2026",  desc: "The first full day of competitions kicks off across every category." },
+    { label: "Day 2",             x: 1860, yOffset: -40, date: "September 4, 2026",  desc: "Competitions continue, with new categories taking the stage." },
+    { label: "Day 3",             x: 2320, yOffset: 71,  date: "September 5, 2026",  desc: "Midway through the festival — more heats, more performances, more energy." },
+    { label: "Day 4",             x: 2780, yOffset: -53, date: "September 6, 2026",  desc: "Competitions roll on as finalists begin to emerge across several categories." },
+    { label: "Day 5",             x: 3240, yOffset: 9,   date: "September 7, 2026",  desc: "The penultimate stretch — semifinals and standout showcases." },
+    { label: "Day 6",             x: 3700, yOffset: -70, date: "September 8, 2026",  desc: "Final competitions wrap up as the festival builds toward its close." },
+    { label: "Day 7",             x: 4160, yOffset: 39,  date: "September 9, 2026",  desc: "The last full day of competition before Sylvara closes its gates." },
+    { label: "Closing",           x: 4620, yOffset: -22, date: "September 10, 2026", desc: "Awards, farewells, and a final celebration as Sylvara 2026 comes to a close." },
   ];
 
-  function buildPlankScatter() {
-    const stage = document.getElementById('plankScatter');
-    if (!stage) return;
-    stage.innerHTML = '';
+  // Extra right-edge padding so the last plank's hover/scatter room
+  // and the track's measured width don't feel cut off right at the
+  // final card
+  const TRACK_END_PADDING = 300;
+
+  function buildCalendarTrack() {
+    const track = document.getElementById('calendarTrack');
+    if (!track) return;
+    track.innerHTML = '';
 
     PLANKS.forEach((plank, i) => {
       const art = plank.art || (i % 2 === 0 ? 'plank1.png' : 'plank2.png');
 
-      const card = document.createElement('button');
+      const card = document.createElement('div');
       card.className = 'plank-card';
-      card.type = 'button';
+      card.style.left = `${plank.x}px`;
+      card.style.transform = `translate(-50%, calc(-50% + ${plank.yOffset}px))`;
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', plank.label);
-
-      card.style.top   = `${plank.top}%`;
-      card.style.left  = `${plank.left}%`;
-      card.style.width = `${plank.size}%`;
-      card.style.zIndex = String(plank.z);
-
-      const depthScale = 0.9 + (plank.z * 0.04);
-      card.style.setProperty('--depth-scale', depthScale);
 
       const img = document.createElement('img');
       img.src = `assets/img/${art}`;
@@ -530,13 +578,26 @@
 
       card.appendChild(img);
       card.appendChild(label);
-      stage.appendChild(card);
+      track.appendChild(card);
 
       card.addEventListener('click', () => openPlankDetail(plank));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openPlankDetail(plank);
+        }
+      });
     });
+
+    // explicit width needed: absolutely-positioned children don't
+    // expand a parent's natural scrollWidth the way flex children
+    // would, so it has to be calculated and set directly here
+    const lastPlank = PLANKS[PLANKS.length - 1];
+    const trackWidth = lastPlank.x + TRACK_END_PADDING;
+    track.style.width = `${trackWidth}px`;
   }
 
-  buildPlankScatter();
+  buildCalendarTrack();
 
   /* ----------------------------------------------------------------
      PLANK DETAIL PANEL + COUNTDOWN
@@ -576,29 +637,29 @@
 
     const targetDate = new Date(`${targetDateStr} 00:00:00`).getTime();
     const countdownEl = document.getElementById('plankCountdown');
-    const passedEl   = document.getElementById('plankCountdownPassed');
+    const passedEl = document.getElementById('plankCountdownPassed');
 
     function tick() {
-      const now      = Date.now();
+      const now = Date.now();
       const distance = targetDate - now;
 
       if (distance <= 0) {
         countdownEl.style.display = 'none';
-        passedEl.style.display    = 'block';
+        passedEl.style.display = 'block';
         clearInterval(plankCountdownInterval);
         return;
       }
 
       countdownEl.style.display = 'grid';
-      passedEl.style.display    = 'none';
+      passedEl.style.display = 'none';
 
-      const days    = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours   = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      setPlankDigit('plankDays',    days);
-      setPlankDigit('plankHours',   hours);
+      setPlankDigit('plankDays', days);
+      setPlankDigit('plankHours', hours);
       setPlankDigit('plankMinutes', minutes);
       setPlankDigit('plankSeconds', seconds);
     }
@@ -609,7 +670,7 @@
 
   function openPlankDetail(plank) {
     document.getElementById('plankDetailTitle').textContent = plank.label;
-    document.getElementById('plankDetailDesc').textContent  = plank.desc || '';
+    document.getElementById('plankDetailDesc').textContent = plank.desc || '';
     document.getElementById('plankOverlay').classList.add('active');
     startPlankCountdown(plank.date);
   }
@@ -628,6 +689,97 @@
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePlankDetail();
+  });
+
+  /* ----------------------------------------------------------------
+     PIN + HORIZONTAL SCRUB
+     The outer wrapper (.calendar-section) needs real scroll height
+     to provide runway for the horizontal sweep -- ScrollTrigger's
+     `pin` handles holding .calendar-track-outer in place for that
+     entire distance, then releases it once the track has fully
+     scrolled past.
+     ---------------------------------------------------------------- */
+  function setupCalendarScroll() {
+    const section = document.querySelector('.calendar-section');
+    const track = document.getElementById('calendarTrack');
+    const bg = document.getElementById('calendarBg');
+    if (!section || !track) return;
+
+    // track.style.width was set explicitly in buildCalendarTrack(),
+    // so offsetWidth reflects that real measured value here
+    const trackWidth = track.offsetWidth;
+    const viewportWidth = window.innerWidth;
+    const travelDistance = Math.max(0, trackWidth - viewportWidth);
+
+    // scroll distance the page needs to provide this horizontal
+    // motion: tying it to travelDistance keeps the horizontal speed
+    // feeling consistent regardless of how many planks there are
+    // No extra buffer here: an earlier version added a small cushion
+    // (window.innerHeight * some fraction) so the pin wouldn't
+    // release the instant the last plank locked into place, but at
+    // every tested size -- mobile and now desktop -- that cushion
+    // read as a noticeable dead pause/blank gap before the footer
+    // rather than a subtle settle. Releasing the pin exactly when
+    // the track finishes its translation avoids that entirely.
+    const scrollDistance = travelDistance;
+
+    // Background moves in LOCKSTEP with the plank track (same
+    // travelDistance, same x target) so it reads as one continuous
+    // painted strip the user travels along as they scroll, rather
+    // than a slower-moving parallax backdrop. This only works
+    // correctly because calendar_sketch.png was painted wide enough
+    // (4920px+) to cover the full travelDistance itself -- if the
+    // image is ever swapped for a narrower one, this will expose a
+    // blank edge once travelDistance exceeds the image's actual
+    // rendered width.
+    if (bg) {
+      const bgRenderedWidth = bg.offsetWidth;
+      if (bgRenderedWidth < trackWidth) {
+        console.warn(
+          `calendar_sketch.png is rendering at ${bgRenderedWidth}px wide, ` +
+          `but the plank track needs ${trackWidth}px of travel room. ` +
+          `The background may run out of image before scrolling finishes ` +
+          `-- repaint it wider or shorten the plank track.`
+        );
+      }
+    }
+
+    ScrollTrigger.getAll().forEach(st => {
+      if (st.vars.id === 'calendarPin') st.kill();
+    });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        id: 'calendarPin',
+        trigger: section,
+        start: 'top top',
+        end: () => `+=${scrollDistance}`,
+        scrub: 1,
+        pin: true,
+        invalidateOnRefresh: true,
+      }
+    });
+
+    tl.to(track, { x: -travelDistance, ease: 'none' }, 0);
+    if (bg) {
+      tl.to(bg, { x: -travelDistance, ease: 'none' }, 0);
+    }
+  }
+
+  // Wait for plank images to load before measuring scrollWidth,
+  // since untouched <img> elements report 0 width before loading
+  window.addEventListener('load', () => {
+    setupCalendarScroll();
+    ScrollTrigger.refresh();
+  });
+
+  let calendarResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(calendarResizeTimer);
+    calendarResizeTimer = setTimeout(() => {
+      setupCalendarScroll();
+      ScrollTrigger.refresh();
+    }, 250);
   });
 </script>
 </body>
