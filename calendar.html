@@ -354,6 +354,13 @@
     #header .logo img {
       max-height: 200px !important;
     }
+
+    /* Remove the green bottom-fade overlay (from #hero::after in style.css)
+       just for this calendar page's hero, without touching index.html's hero. */
+    #hero.calendar-hero::after {
+      content: none;
+      background: none;
+    }
   </style>
 </head>
 
@@ -382,12 +389,12 @@
   </header>
 
   <section id="hero" class="calendar-hero">
-    <img src="assets/img/BACKGROUND_FOUNTAIN.jpg" class="calendar-hero-bg" loading="lazy" alt="">
+    <img src="assets/img/BACKGROUND_FOUNTAIN.png" class="calendar-hero-bg" loading="lazy" alt="">
     <h1 class="calendar-hero-title">Event Calendar</h1>
   </section>
 
   <section class="calendar-section" id="calendarSection">
-    <img src="assets/img/calendar_sketch2.png" class="calendar-bg" id="calendarBg" loading="lazy" alt="">
+    <img src="assets/img/BACKGROUND FOUNTAIN 2.png" class="calendar-bg" id="calendarBg" loading="lazy" alt="">
 
     <div class="calendar-heading">
       <h2>Event Calendar</h2>
