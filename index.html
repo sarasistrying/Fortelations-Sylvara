@@ -345,6 +345,106 @@
         transform: translateX(-50%) translateY(0);
       }
     }
+
+    /* ============================================================
+       PATHWAY SECTION
+       Same background treatment as .about/.countdown-section
+       (bg_regis.png here in place of Pure Background Animation.webp:
+       background-image + no-repeat + center + cover, position:
+       relative, min-height: 100vh, width: 100%). Two hanging wooden
+       signs sit left/right like a fork in the path, each carrying a
+       caption and a directional arrow button.
+       ============================================================ */
+    .pathway-section {
+      background-image: url("assets/img/bg_regis.png");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 60px 6%;
+      gap: 24px;
+    }
+
+    .pathway-sign {
+      position: relative;
+      width: clamp(220px, 26vw, 380px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pathway-sign img.sign-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55));
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .pathway-sign-content {
+      position: absolute;
+      top: 46%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 78%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(10px, 1.6vw, 18px);
+    }
+
+    .pathway-sign-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: clamp(13px, 1.4vw, 18px);
+      color: #4A2E10;
+      line-height: 1.25;
+      margin: 0;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .pathway-sign-button {
+      width: clamp(38px, 4vw, 52px);
+      height: clamp(38px, 4vw, 52px);
+      border-radius: 50%;
+      background: #FCDD8B;
+      color: #4A2E10;
+      border: 2px solid #B8752A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 2vw, 26px);
+      text-decoration: none;
+      box-shadow: 0 0 14px rgba(252, 221, 139, 0.6);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .pathway-sign-button:hover,
+    .pathway-sign-button:focus-visible {
+      transform: scale(1.12);
+      box-shadow: 0 0 22px rgba(252, 221, 139, 0.9);
+      color: #4A2E10;
+    }
+
+    @media (max-width: 768px) {
+      .pathway-section {
+        flex-direction: column;
+        justify-content: center;
+        padding: 80px 6%;
+        gap: 48px;
+      }
+
+      .pathway-sign {
+        width: clamp(200px, 62vw, 320px);
+      }
+    }
   </style>
 </head>
 
@@ -505,7 +605,7 @@
 
     <section id="competitions" class="competitions-section">
 
-      <img src="assets/img/comp sketch.png" class="competitions-bg" loading="lazy" alt="">
+      <img src="assets/img/BACKGROUND HOMEPAGE.png" class="competitions-bg" loading="lazy" alt="">
 
       <div class="competitions-heading">
         <img src="assets/img/headings/Competition.png" class="section-heading-img" alt="Competitions" loading="lazy">
@@ -513,6 +613,32 @@
       </div>
 
       <div class="rock-scatter" id="rockScatter"></div>
+
+    </section>
+
+    <section id="pathway" class="pathway-section">
+
+      <img src="assets/img/bg regis.png" class="competitions-bg" loading="lazy" alt="">
+
+      <div class="pathway-sign pathway-sign-left">
+        <img src="assets/img/sign 1.jpg" class="sign-img" alt="Wooden signpost" loading="lazy">
+        <div class="pathway-sign-content">
+          <p class="pathway-sign-text">Want to Know More About Fortelations?</p>
+          <a href="#hero" class="pathway-sign-button" aria-label="Learn more about Fortelations">
+            <i class="bi bi-arrow-left"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="pathway-sign pathway-sign-right">
+        <img src="assets/img/sign 2.jpg" class="sign-img" alt="Wooden signpost" loading="lazy">
+        <div class="pathway-sign-content">
+          <p class="pathway-sign-text">Want to Check Our Event Timeline?</p>
+          <a href="#about" class="pathway-sign-button" aria-label="Check our event timeline">
+            <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
 
     </section>
 

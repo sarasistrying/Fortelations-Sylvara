@@ -288,19 +288,29 @@ let scrollTl1 = gsap.timeline({
 });
 scrollTl1.from(".forteposter", {opacity: 0, scale: 0.8, duration: 0.15, stagger: {each: 0.4}})
 
-const lenis = new Lenis()
+// If another script on this page (index.html's own inline setup)
+// already created a Lenis instance and exposed it as window.lenis,
+// reuse that one instead of creating a second, competing instance.
+// Two simultaneous Lenis instances both intercept wheel/touch
+// scroll and fight for control -- that silently breaks GSAP
+// ScrollTrigger pins that depend on precise scroll-position sync,
+// which is exactly what was happening to the forest hero section.
+if (!window.lenis) {
+  const lenis = new Lenis()
+  window.lenis = lenis
 
-lenis.on('scroll', (e) => {
-console.log(e)
-})
+  lenis.on('scroll', (e) => {
+  console.log(e)
+  })
 
-lenis.on('scroll', ScrollTrigger.update)
+  lenis.on('scroll', ScrollTrigger.update)
 
-gsap.ticker.add((time)=>{
-lenis.raf(time * 1000)
-})
+  gsap.ticker.add((time)=>{
+  lenis.raf(time * 1000)
+  })
 
-gsap.ticker.lagSmoothing(0)
+  gsap.ticker.lagSmoothing(0)
+}
 
 
 
