@@ -187,7 +187,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(0px, 0.3vw, 4px);
+    gap: clamp(16px, 3vw, 32px);
     text-align: center;
   }
   .fortelations-heading-img {
@@ -292,13 +292,6 @@
     margin: 0;
   }
   @media (max-width: 768px) {
-    .about-hero {
-      aspect-ratio: auto;
-      min-height: 100vh;
-      min-height: 100dvh;
-      overflow: visible;
-      padding-top: 100px;
-    }
     .about-body {
       aspect-ratio: auto;
       min-height: 110vh;
@@ -328,20 +321,27 @@
   .history-pin-trigger {
     position: relative;
     width: 100%;
-    height: 200vh;
     background: #142310;
   }
   .history-stage {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100dvh;
+    aspect-ratio: 1600 / 900;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: clamp(16px, 3vw, 32px);
+  }
+  /* Match the stage's shape to whichever image the <picture>
+     element is actually serving at each breakpoint, so cover has
+     nothing left to crop -- same trick as the hero/About Forte
+     sections. No downside to doing this here since there's no
+     pin/sticky requirement forcing a fixed height anymore. */
+  @media (max-width: 1024px) {
+    .history-stage { aspect-ratio: 1200 / 1200; }
+  }
+  @media (max-width: 599px) {
+    .history-stage { aspect-ratio: 900 / 1600; }
   }
   .history-stage-bg {
     position: absolute;
@@ -353,6 +353,12 @@
     z-index: 0;
     pointer-events: none;
   }
+  /* Desktop only (matches the >1024px breakpoint the <picture>
+     sources use) -- show the full, uncropped 1600x900 image
+     instead of cropping to fill. The container itself stays
+     100vh (still required for the pin), so this can letterbox
+     into the section's own dark background color rather than
+     crop -- no change to the pin mechanism at all. */
 
   .history-heading-wrap,
   .history-carousel,
@@ -362,7 +368,7 @@
   }
 
   .history-heading-wrap {
-    width: min(60vw, 460px);
+    width: min(34vw, 280px);
   }
   .history-heading-img {
     display: block;
@@ -388,9 +394,32 @@
     width: 100%;
     padding: 0 16px;
   }
+  .history-carousel-btn {
+    flex: 0 0 auto;
+    width: clamp(36px, 4vw, 48px);
+    height: clamp(36px, 4vw, 48px);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(184, 190, 73, 0.5);
+    color: #FCDD8B;
+    font-size: clamp(14px, 1.6vw, 18px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .history-carousel-btn:hover {
+    background: rgba(184, 190, 73, 0.3);
+    border-color: rgba(184, 190, 73, 0.9);
+  }
+  .history-carousel-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
   .history-carousel-viewport {
     overflow: hidden;
-    width: min(58vw, 600px);
+    width: min(80vw, 820px);
   }
   .history-carousel-track {
     display: flex;
@@ -491,72 +520,9 @@
   }
   .history-video-link:hover { color: #FCDD8B; }
   @media (max-width: 768px) {
-    .history-stage {
-      justify-content: flex-start;
-      padding-top: 95px;
-      gap: clamp(10px, 2.5vh, 20px);
-    }
-    .history-heading-wrap { width: min(58vw, 300px); }
-    .history-carousel-viewport { width: min(80vw, 380px); }
-    .history-carousel-dots { margin-top: 4px; }
-  }
-
-  /* ============================================================
-     GALLERY -- now folded into the same pinned History carousel as
-     3 additional slides after the 5 videos, reusing the exact same
-     track/dots/drag/wheel mechanism (see JS) instead of a separate
-     scroll system. Each slide is a gapless 4x3 grid (12 units,
-     tiled exactly by 6 images: one 2x2, one 2x1, two 1x1, two 2x1)
-     using explicit positional classes -- the earlier :nth-of-type
-     approach was a real bug: it counts ALL sibling <div>s by tag,
-     not filtered by class, so it was landing on the wrong elements
-     entirely and leaving unintended gaps.
-     ============================================================ */
-  .gallery-slide {
-    flex: 0 0 100%;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 6px;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    /* Fade the left/right edges to transparent instead of a hard
-       rectangular cutoff -- softens the "boxy" look */
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-  }
-  .gallery-item {
-    overflow: hidden;
-  }
-  .gallery-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    pointer-events: none;
-  }
-  /* Explicit, gapless 4x3 tiling -- every cell filled, no unused space */
-  .g-pos-1 { grid-column: 1 / 3; grid-row: 1 / 3; } /* big 2x2 top-left */
-  .g-pos-2 { grid-column: 3 / 5; grid-row: 1 / 2; } /* wide 2x1 top-right */
-  .g-pos-3 { grid-column: 3 / 4; grid-row: 2 / 3; } /* small 1x1 */
-  .g-pos-4 { grid-column: 4 / 5; grid-row: 2 / 3; } /* small 1x1 */
-  .g-pos-5 { grid-column: 1 / 3; grid-row: 3 / 4; } /* wide 2x1 bottom-left */
-  .g-pos-6 { grid-column: 3 / 5; grid-row: 3 / 4; } /* wide 2x1 bottom-right */
-  @media (max-width: 768px) {
-    .gallery-slide {
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      aspect-ratio: 3 / 4;
-    }
-    .g-pos-1 { grid-column: 1 / 3; grid-row: 1 / 2; }
-    .g-pos-2 { grid-column: 1 / 2; grid-row: 2 / 3; }
-    .g-pos-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
-    .g-pos-4 { grid-column: 1 / 2; grid-row: 3 / 4; }
-    .g-pos-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
-    .g-pos-6 { grid-column: 1 / 3; grid-row: 4 / 5; }
+    .history-heading-wrap { width: min(44vw, 220px); }
+    .history-carousel-viewport { width: min(78vw, 420px); }
+    .history-carousel-btn { display: none; } /* rely on swipe on mobile */
   }
 
   /* ============================================================
@@ -645,7 +611,11 @@
 </header>
 
 <section class="about-hero">
-  <img src="assets/img/AboutPageBackground1.png" class="about-hero-bg" alt="" loading="eager">
+  <picture>
+    <source media="(max-width: 599px)" srcset="assets/img/AboutPageBackground1_MOBILE.png">
+    <source media="(max-width: 1024px)" srcset="assets/img/AboutPageBackground1_TABLET.png">
+    <img src="assets/img/AboutPageBackground1.png" class="about-hero-bg" alt="" loading="eager">
+  </picture>
   <div class="about-forte-heading">
     <img src="assets/img/headings/fortelations.png" class="fortelations-heading-img" alt="Fortelations" loading="eager">
     <p class="forte-desc">An annual event of "Information Technology for Language, Education &amp; Sport" by SMAK 7 PENABUR Jakarta</p>
@@ -653,7 +623,11 @@
 </section>
 
 <div class="about-body">
-  <img src="assets/img/AboutPageBackground2.png" class="about-body-bg" alt="" loading="lazy">
+  <picture>
+    <source media="(max-width: 599px)" srcset="assets/img/AboutPageBackground2_MOBILE.png">
+    <source media="(max-width: 1024px)" srcset="assets/img/AboutPageBackground2_TABLET.png">
+    <img src="assets/img/AboutPageBackground2.png" class="about-body-bg" alt="" loading="lazy">
+  </picture>
 
   <section class="about-body-section">
     <img src="assets/img/headings/Aboutpage.png" class="about-body-heading-img" alt="About Forte" loading="lazy">
@@ -665,12 +639,17 @@
 
 <section class="history-pin-trigger" id="historyPinTrigger">
   <div class="history-stage">
-    <img src="assets/img/AboutPageBackground3.png" class="history-stage-bg" alt="" loading="lazy">
+    <picture>
+      <source media="(max-width: 599px)" srcset="assets/img/AboutPageBackground3_MOBILE.png">
+      <source media="(max-width: 1024px)" srcset="assets/img/AboutPageBackground3_TABLET.png">
+      <img src="assets/img/AboutPageBackground3.png" class="history-stage-bg" alt="" loading="lazy">
+    </picture>
     <div class="history-heading-wrap">
       <img src="assets/img/headings/History.png" class="history-heading-img" alt="History" loading="lazy">
     </div>
 
     <div class="history-carousel">
+      <button class="history-carousel-btn" id="historyPrev" aria-label="Previous video" type="button">&#10094;</button>
 
       <div class="history-carousel-viewport">
         <div class="history-carousel-track" id="historyCarouselTrack">
@@ -725,36 +704,10 @@
             <a class="history-video-link" href="https://www.youtube.com/watch?v=MGm60hgxD7U" target="_blank" rel="noopener">Watch on YouTube &#8599;</a>
           </div>
 
-          <div class="gallery-slide">
-            <div class="gallery-item g-pos-1"><img src="assets/img/Documentation/Gallery1.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-2"><img src="assets/img/Documentation/Gallery2.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-3"><img src="assets/img/Documentation/Gallery3.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-4"><img src="assets/img/Documentation/Gallery4.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-5"><img src="assets/img/Documentation/Gallery5.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-6"><img src="assets/img/Documentation/Gallery6.webp" alt="Fortelations documentation" loading="lazy"></div>
-          </div>
-
-          <div class="gallery-slide">
-            <div class="gallery-item g-pos-1"><img src="assets/img/Documentation/Gallery7.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-2"><img src="assets/img/Documentation/Gallery8.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-3"><img src="assets/img/Documentation/Gallery9.jpg" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-4"><img src="assets/img/Documentation/Gallery10.jpg" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-5"><img src="assets/img/Documentation/Gallery1.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-6"><img src="assets/img/Documentation/Gallery3.webp" alt="Fortelations documentation" loading="lazy"></div>
-          </div>
-
-          <div class="gallery-slide">
-            <div class="gallery-item g-pos-1"><img src="assets/img/Documentation/Gallery5.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-2"><img src="assets/img/Documentation/Gallery7.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-3"><img src="assets/img/Documentation/Gallery9.jpg" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-4"><img src="assets/img/Documentation/Gallery2.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-5"><img src="assets/img/Documentation/Gallery4.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-6"><img src="assets/img/Documentation/Gallery6.webp" alt="Fortelations documentation" loading="lazy"></div>
-          </div>
-
         </div>
       </div>
 
+      <button class="history-carousel-btn" id="historyNext" aria-label="Next video" type="button">&#10095;</button>
     </div>
 
     <div class="history-carousel-dots" id="historyDots">
@@ -763,9 +716,6 @@
       <button class="history-dot" data-index="2" aria-label="Video 3"></button>
       <button class="history-dot" data-index="3" aria-label="Video 4"></button>
       <button class="history-dot" data-index="4" aria-label="Video 5"></button>
-      <button class="history-dot" data-index="5" aria-label="Gallery 1"></button>
-      <button class="history-dot" data-index="6" aria-label="Gallery 2"></button>
-      <button class="history-dot" data-index="7" aria-label="Gallery 3"></button>
     </div>
   </div>
 </section>
@@ -828,25 +778,29 @@
     updateHeaderScrolled();
   }
 
-  // ---------- History: manual carousel ----------
-  // Navigation between videos is entirely manual (buttons, drag,
-  // dots, arrow keys) -- nothing here is driven by continuous
-  // scroll position, so there's no per-frame recalculation that can
-  // desync/reset the way the earlier GSAP ScrollTrigger scrub did.
-  // The section itself still uses position:sticky (see CSS) so it
-  // holds in the viewport while you're in this area of the page.
+  // ---------- History: manual carousel (no pin/sticky) ----------
+  // This variant (about_2.html) removes the sticky/pin scroll
+  // mechanism entirely -- the History section is now a normal
+  // in-flow section, not pinned to the viewport. Navigation between
+  // videos is entirely manual: prev/next buttons, drag, dots, and
+  // arrow keys. No wheel-driven navigation, no scroll position
+  // tracking at all for this section.
   (function historyCarousel() {
     const track = document.getElementById('historyCarouselTrack');
     if (!track) return;
 
     const cards = Array.from(track.children);
     const count = cards.length;
+    const prevBtn = document.getElementById('historyPrev');
+    const nextBtn = document.getElementById('historyNext');
     const dots = Array.from(document.querySelectorAll('#historyDots .history-dot'));
     let index = 0;
 
     function render() {
       track.style.transform = `translateX(-${index * 100}%)`;
       dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index === count - 1;
     }
 
     function goTo(i) {
@@ -854,6 +808,8 @@
       render();
     }
 
+    prevBtn && prevBtn.addEventListener('click', () => goTo(index - 1));
+    nextBtn && nextBtn.addEventListener('click', () => goTo(index + 1));
     dots.forEach((dot) => {
       dot.addEventListener('click', () => goTo(Number(dot.dataset.index)));
     });
@@ -904,61 +860,6 @@
       if (e.key === 'ArrowLeft') goTo(index - 1);
       if (e.key === 'ArrowRight') goTo(index + 1);
     });
-
-    // ---------- Wheel-driven navigation ----------
-    // Scrolling down while over the carousel advances to the next
-    // video, scrolling up goes back to the previous one. This
-    // direction matters: scroll-down has to mean "go forward
-    // through the videos" so that starting on video 1 and scrolling
-    // down actually engages the carousel and holds you here until
-    // you've reached the last video -- if down mapped to "previous"
-    // instead, video 1 (already the first) would immediately hit
-    // that boundary and fall straight through to normal page
-    // scroll, skipping the pinned carousel entirely.
-    // Listens on the whole .history-stage rather than just the
-    // narrow viewport -- each video's YouTube iframe is a
-    // cross-origin embed, and wheel events that happen while the
-    // cursor is directly over a cross-origin iframe are captured by
-    // that iframe's own document and never bubble up to us. Since
-    // the iframe now covers most of each card, listening on the
-    // wider stage instead gives scroll a much bigger area to
-    // actually reach this handler.
-    // Debounced to one step per scroll gesture (wheel fires many
-    // times during a single physical scroll motion). Releases back
-    // to normal page scroll once you're at the first/last video, so
-    // scrolling is never trapped in this section.
-    const stageEl = document.querySelector('.history-stage') || track;
-    let wheelCooldown = false;
-
-    function isStageReasonablyInView() {
-      const rect = stageEl.getBoundingClientRect();
-      // Loosened from requiring pixel-perfect full-viewport coverage
-      // to just requiring most of the stage to be visible. The sticky
-      // mechanism itself already keeps the stage filling the screen
-      // once it's actually pinned, so this doesn't need to gate that
-      // precisely -- it was mostly just delaying activation
-      // unnecessarily on some screens/zoom levels.
-      const visibleTop = Math.max(rect.top, 0);
-      const visibleBottom = Math.min(rect.bottom, window.innerHeight);
-      const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-      return visibleHeight >= window.innerHeight * 0.7;
-    }
-
-    stageEl.addEventListener('wheel', (e) => {
-      if (!isStageReasonablyInView()) return; // still scrolling into place -- let the page scroll normally
-
-      const scrollingDown = e.deltaY > 0;
-      const goingToNext = scrollingDown; // scroll down -> advance forward
-      const canMove = goingToNext ? index < count - 1 : index > 0;
-
-      if (!canMove) return; // at a boundary -- let the page scroll normally
-
-      e.preventDefault();
-      if (wheelCooldown) return;
-      wheelCooldown = true;
-      goTo(goingToNext ? index + 1 : index - 1);
-      setTimeout(() => { wheelCooldown = false; }, 780);
-    }, { passive: false });
 
     render();
   })();
