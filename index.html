@@ -332,8 +332,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(20px, 4vw, 40px);
-    padding: 20px;
+    padding: 80px 20px 50px;
     opacity: 0;
     pointer-events: none;
   }
@@ -343,6 +342,7 @@
     gap: clamp(20px, 4vw, 44px);
     max-width: min(95vw, 1400px);
     width: 100%;
+    margin-bottom: 40px;
   }
   .forest-countdown .countdown-box {
     background: rgba(0, 0, 0, 0.55);
@@ -407,12 +407,16 @@
        single narrow column of 4 stacked boxes -- fits all four on
        screen at once and gives each box more usable width for the
        digits, rather than one cramped column. */
+    .forest-countdown { padding: 60px 12px 30px; }
     .forest-countdown .countdown-timer {
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: clamp(14px, 3vw, 28px);
+      max-width: 100%;
+      padding: 0 10px;
     }
-    .forest-countdown .countdown-box { padding: 24px 16px; }
-    .forest-countdown .countdown-digit { height: clamp(40px, 9vw, 70px); }
+    .forest-countdown .countdown-box { padding: clamp(20px, 5vw, 32px) clamp(16px, 3vw, 24px); border-radius: 20px; }
+    .forest-countdown .countdown-digit { height: clamp(40px, 12vw, 60px); }
+    .forest-countdown .countdown-label { font-size: clamp(13px, 3.2vw, 16px); }
   }
 
   /* ============================================================
@@ -467,7 +471,7 @@
   }
   .rock {
     position: absolute;
-    width: 20%;
+    width: clamp(56px, 13%, 165px);
     height: auto;
     aspect-ratio: 1 / 1;
     cursor: pointer;
@@ -514,10 +518,13 @@
     line-height: 1.2;
   }
 
-  /* Bigger tap targets on mobile only -- desktop's 20% above
-     stays untouched. */
+  /* Bigger, screen-fitted tap targets on mobile -- sized larger
+     relative to the narrower stage than desktop for visibility and
+     tappability. Checked against every COMPETITIONS coordinate at
+     this size (390px-wide stage) and confirmed no two stones'
+     bounding boxes overlap, even at the 120px cap. */
   @media (max-width: 768px) {
-    .rock { width: 32%; }
+    .rock { width: clamp(64px, 24%, 120px); }
   }
   /* ============================================================
      ROCK DETAIL OVERLAY -- a centered modal shared by every stone
@@ -610,13 +617,31 @@
     align-items: center;
     justify-content: space-between;
     padding: 60px 6%;
-    gap: 24px 40px;
+    gap: 24px 20px;
     background: #142310;
   }
   .pathway-sign {
     position: relative;
     z-index: 1;
-    width: clamp(340px, 46vw, 700px);
+    /* Two of these sit side-by-side in a row with a 40px gap inside
+       .pathway-section's 6%-each-side padding. The old clamp(340px,
+       46vw,700px) only actually fit two-across once the viewport
+       passed ~1618px -- below that (i.e. almost every real laptop:
+       1366/1440/1536/etc) the combined width exceeded the available
+       row width and flex-wrap silently stacked the signs vertically,
+       even though this is well above the 768px mobile breakpoint.
+       This formula is sized so 2 * width + 40px gap always fits
+       within the available row width from 769px upward. */
+    width: clamp(325px, 42vw, 780px);
+    /* The heading text and button below were sized off viewport
+       width (vw), completely decoupled from this box's own width.
+       Once the box formula above changed, that mismatch made the
+       text/button bleed past the plank at box sizes the vw math
+       didn't anticipate. container-type here lets them size off
+       THIS element's own rendered width instead (cqw units), so
+       they stay in proportion to the sign no matter what width
+       formula this box ends up using. */
+    container-type: inline-size;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -635,17 +660,17 @@
     position: absolute;
     top: 63%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 72%;
+    width: 60%;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(10px, 1.6vw, 18px);
+    gap: clamp(6px, 2.2cqw, 16px);
   }
   .pathway-sign-text {
     font-family: 'Cinzel', serif;
     font-weight: 800;
-    font-size: clamp(12px, 1.5vw, 18px);
+    font-size: clamp(9px, 5.2cqw, 17px);
     letter-spacing: 0.5px;
     text-transform: uppercase;
     color: #2C1205;
@@ -668,8 +693,8 @@
       0 0 28px rgba(255, 160, 0, 0.5);
   }
   .pathway-sign-button {
-    width: clamp(38px, 4vw, 52px);
-    height: clamp(38px, 4vw, 52px);
+    width: clamp(26px, 9cqw, 46px);
+    height: clamp(26px, 9cqw, 46px);
     border-radius: 50%;
     background: #FCDD8B;
     color: #4A2E10;
@@ -677,7 +702,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(18px, 2vw, 26px);
+    font-size: clamp(13px, 4cqw, 22px);
     text-decoration: none;
     box-shadow: 0 0 14px rgba(252, 221, 139, 0.6);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -687,8 +712,11 @@
     box-shadow: 0 0 22px rgba(252, 221, 139, 0.9);
   }
   @media (max-width: 768px) {
-    .pathway-section { flex-direction: column; justify-content: center; padding: 80px 6%; gap: 48px; }
-    .pathway-sign { width: clamp(280px, 88vw, 480px); }
+    /* Side-by-side even on mobile now, not stacked -- signs just
+       shrink further so 2 * width + gap always fits within the
+       narrower row. Checked down to 320px-wide devices. */
+    .pathway-section { padding: 60px 1.6%; gap: 4px; }
+    .pathway-sign { width: clamp(148px, 47vw, 460px); }
   }
 
   /* ============================================================
@@ -754,10 +782,68 @@
     .footer-favicon { width: 80px; height: 80px; }
     .footer-center-logo { max-width: 250px; }
   }
+
+  /* ============================================================
+     FIREFLY CURSOR
+     Custom cursor replaces the native pointer with the firefly
+     image, glowing via stacked drop-shadows and gently pulsing.
+     A trail of small glowing particles spawns as the mouse moves
+     and fades out behind it. JS-driven (see script near the end
+     of the body) -- this block just holds the visual styling.
+     Disabled on touch devices via JS (no real cursor to replace).
+     ============================================================ */
+  html.firefly-active, html.firefly-active * {
+    cursor: none !important;
+  }
+  #fireflyCursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    margin-left: -20px;
+    margin-top: -20px;
+    pointer-events: none;
+    z-index: 100000;
+    will-change: transform;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    filter:
+      drop-shadow(0 0 6px rgba(255, 240, 150, 0.95))
+      drop-shadow(0 0 14px rgba(255, 220, 100, 0.75))
+      drop-shadow(0 0 28px rgba(255, 190, 60, 0.55));
+  }
+  #fireflyCursor.is-visible { opacity: 1; }
+  #fireflyCursor img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    animation: firefly-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes firefly-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.18); opacity: 0.82; }
+  }
+  .firefly-particle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    margin-left: -3.5px;
+    margin-top: -3.5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 248, 200, 1) 0%, rgba(255, 214, 110, 0.9) 45%, rgba(255, 180, 50, 0) 75%);
+    pointer-events: none;
+    z-index: 99999;
+    will-change: transform, opacity;
+  }
 </style>
 </head>
 
 <body>
+
+<div id="fireflyCursor" aria-hidden="true"><img src="assets/img/cursor.png" alt="" draggable="false"></div>
 
 <header>
   <div class="container">
@@ -794,7 +880,7 @@
     </div>
 
     <div class="forest-countdown" id="forestCountdown">
-      <img src="assets/img/headings/Countdown.png" class="section-heading-img" alt="Countdown" style="margin: 0 auto; width: min(80vw, 820px);" loading="lazy">
+      <img src="assets/img/headings/Countdown.png" class="section-heading-img" alt="Countdown" loading="lazy">
 
       <div class="countdown-timer" id="countdown">
         <div class="countdown-box">
@@ -854,7 +940,7 @@
   </div>
 
   <section id="pathway" class="pathway-section">
-    <img src="assets/img/bg regis.png" class="competitions-bg" loading="lazy" alt="">
+    <img src="assets/img/PathwayBackground.jpeg" class="competitions-bg" loading="lazy" alt="">
 
     <div class="pathway-sign pathway-sign-left">
       <img src="assets/img/sign1.png" class="sign-img" alt="Wooden signpost" loading="lazy">
@@ -1058,10 +1144,28 @@
         scrub: 1,
         pin: '.forest-stage',
         pinSpacing: false,
+        // Recompute this ScrollTrigger's start/end AND re-render the
+        // timeline's tweens from scratch on every refresh (not just
+        // reuse whatever was cached from the first measurement).
+        // Pinning a nested element inside a much taller trigger like
+        // this is measured before the page has fully settled (fonts/
+        // images swapping in change layout height); without this, a
+        // stale first-pass measurement can leave tweens rendering as
+        // if the scroll were already partway through -- which is
+        // exactly what an "already invisible on load" logo looks like.
+        invalidateOnRefresh: true,
       }
     });
 
-    tl.to('#forestLogo', { opacity: 0, scale: 0.55, y: -40, duration: 1.6, ease: 'power1.in' }, 0.3);
+    // Explicit fromTo (not .to) so the logo's start state is pinned
+    // to known values instead of "whatever GSAP currently reads on
+    // the element" -- a plain .to() inherits its start from current
+    // computed style, and if this scrub timeline's progress isn't
+    // exactly 0 the instant it's built (a common quirk with pinned
+    // ScrollTrigger setups before layout has fully settled), that
+    // silently starts the logo already faded/shrunk instead of
+    // visible at the top of the page.
+    tl.fromTo('#forestLogo', { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.55, y: -40, duration: 1.6, ease: 'power1.in' }, 0.3);
     tl.to('.forest-bg', { scale: 1.3, duration: 4.2, ease: 'none' }, 0.2);
 
     tl.fromTo('.forest-tree-farmid', { scale: 1 }, { scale: 2.2, duration: 2.6, ease: 'power1.in' }, 0.2);
@@ -1119,6 +1223,18 @@
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (stageEl) stageEl.classList.add('is-ready');
+          // Belt-and-suspenders: if we're still essentially at the
+          // top of the page (haven't scrolled into the fade-out
+          // range yet), force the logo visible directly, bypassing
+          // whatever the scrub timeline currently thinks its state
+          // should be. GSAP overwrites this the moment real scroll
+          // input drives the timeline, so it doesn't fight the
+          // intended scroll-away animation -- it only guarantees the
+          // very first paint isn't a silently-already-faded logo.
+          const logoEl = document.getElementById('forestLogo');
+          if (logoEl && window.scrollY < window.innerHeight * 0.5) {
+            gsap.set(logoEl, { opacity: 1, scale: 1, y: 0 });
+          }
         });
       });
     };
@@ -1226,6 +1342,124 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeRockDetail();
   });
+</script>
+
+<!-- Deliberately its own script tag, not appended to the GSAP-driven
+     one above -- this has zero GSAP dependency, and keeping it
+     separate means it still runs fine even if the GSAP/ScrollTrigger
+     CDN scripts fail to load for any reason (network hiccup, an
+     ad-blocker, etc.), instead of silently dying along with
+     whatever threw earlier in that other script. -->
+<script>
+  /* ---------- Firefly cursor + particle trail ----------
+     Swaps the native pointer for the firefly image (glowing via
+     CSS drop-shadow, see the #fireflyCursor rules above) and
+     spawns small glowing particles behind it as it moves, each
+     drifting upward and fading out via the Web Animations API so
+     no per-particle @keyframes are needed.
+
+     Deliberately does NOT gate on 'ontouchstart' in window /
+     navigator.maxTouchPoints up front -- those report touch
+     CAPABILITY, not what the person is actually using right now,
+     and plenty of real laptops (touchscreen Windows machines,
+     some embedded/webview browsers) report touch support even
+     though the person is on a mouse. That false positive would
+     skip attaching the mousemove listener entirely, so the cursor
+     would just never appear -- exactly this symptom. Instead: set
+     up the effect unconditionally, and only actually disable it if
+     a genuine touchstart fires (a real touch interaction, not mere
+     capability), which is the reliable signal. */
+  (function initFireflyCursor() {
+    const cursorEl = document.getElementById('fireflyCursor');
+    if (!cursorEl) return;
+
+    let active = true;
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let curX = targetX;
+    let curY = targetY;
+    let hasMoved = false;
+    let lastParticleAt = 0;
+
+    function spawnParticle(x, y) {
+      const now = performance.now();
+      if (now - lastParticleAt < 45) return; // throttle so it's a trail, not a solid smear
+      lastParticleAt = now;
+
+      const particle = document.createElement('div');
+      particle.className = 'firefly-particle';
+      const jitterX = (Math.random() - 0.5) * 10;
+      const jitterY = (Math.random() - 0.5) * 10;
+      const startX = x + jitterX;
+      const startY = y + jitterY;
+      const driftX = (Math.random() - 0.5) * 26;
+      const driftY = -14 - Math.random() * 22;
+
+      particle.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
+      document.body.appendChild(particle);
+
+      const anim = particle.animate([
+        { transform: `translate3d(${startX}px, ${startY}px, 0) scale(1)`, opacity: 0.9 },
+        { transform: `translate3d(${startX + driftX}px, ${startY + driftY}px, 0) scale(0.15)`, opacity: 0 }
+      ], { duration: 650 + Math.random() * 350, easing: 'ease-out' });
+      anim.onfinish = () => particle.remove();
+    }
+
+    function onMouseMove(e) {
+      if (!active) return;
+      targetX = e.clientX;
+      targetY = e.clientY;
+      if (!hasMoved) {
+        hasMoved = true;
+        curX = targetX;
+        curY = targetY;
+        document.documentElement.classList.add('firefly-active');
+        cursorEl.classList.add('is-visible');
+      }
+      spawnParticle(targetX, targetY);
+    }
+
+    function disableForTouch() {
+      active = false;
+      document.documentElement.classList.remove('firefly-active');
+      cursorEl.classList.remove('is-visible');
+      window.removeEventListener('mousemove', onMouseMove);
+    }
+
+    window.addEventListener('mousemove', onMouseMove);
+    // A real touch interaction (not just capability) is the
+    // trustworthy signal to bail out on -- once is enough, since a
+    // device that's genuinely touch-primary won't start firing
+    // real mousemove events afterward.
+    window.addEventListener('touchstart', disableForTouch, { passive: true, once: true });
+
+    document.addEventListener('mouseleave', () => cursorEl.classList.remove('is-visible'));
+    document.addEventListener('mouseenter', () => { if (active && hasMoved) cursorEl.classList.add('is-visible'); });
+
+    function tick() {
+      // light lerp smoothing so the firefly eases toward the pointer
+      // instead of snapping exactly to it, frame to frame
+      curX += (targetX - curX) * 0.35;
+      curY += (targetY - curY) * 0.35;
+      cursorEl.style.transform = `translate3d(${curX}px, ${curY}px, 0)`;
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    // Ambient sparkle: keeps particles drifting off the firefly even
+    // when the mouse sits still, instead of the trail only appearing
+    // while actively moving. Reuses spawnParticle's own 45ms throttle
+    // (this interval is slower than that, so it just becomes the
+    // active spawn source whenever mousemove isn't already feeding
+    // it) -- wider jitter than the movement trail so it reads as
+    // ambient sparkle around the firefly rather than a straight tail.
+    setInterval(() => {
+      if (!active || !hasMoved) return;
+      const idleJitterX = (Math.random() - 0.5) * 30;
+      const idleJitterY = (Math.random() - 0.5) * 30;
+      spawnParticle(curX + idleJitterX, curY + idleJitterY);
+    }, 180);
+  })();
 </script>
 
 </body>

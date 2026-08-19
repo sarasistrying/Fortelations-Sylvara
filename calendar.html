@@ -1,491 +1,639 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>FORTELATIONS 2026: SYLVARA</title>
+<link href="assets/img/favicon.webp" rel="icon">
 
-  <title>FORTELATIONS 2026: SYLVARA</title>
-  <meta content="" name="description">
-  <meta content="FORTELATIONS" name="keywords">
+<!-- Rebuilt lean, same approach as index.html and about.html: no
+     style.css, no Bootstrap (and its 6 reboot/grid/utilities
+     variants), no AOS/GLightbox/Swiper/boxicons/remixicon/
+     bootstrap-icons, no PureCounter, no php-email-form validate.js,
+     no main.js. This page has no scroll-jacked/pinned sections --
+     the planks are just CSS-positioned elements you scroll past
+     natively -- so it also skips GSAP/ScrollTrigger/Lenis entirely
+     (index.html still needs Lenis+GSAP for its pinned forest hero;
+     this page never did). All of that was dead weight fighting the
+     browser's native scroll for no visual benefit, which is the
+     "scrolling doesn't feel smooth" complaint -- removing it should
+     make scrolling feel like plain native scrolling, because now it
+     is. -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
 
-  <link href="assets/img/favicon.webp" rel="icon">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: auto; }
+  body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #fff;
+    background-color: #0C0129;
+  }
+  img { max-width: none; }
 
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Montserrat:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
+  @keyframes logo-float {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
 
-  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
-
-  <link href="assets/css/style.css" rel="stylesheet">
-
-  <style>
-    /* ============================================================
-       BACKGROUND FIX (carried over from index.html)
-       Keeps any fixed-position background art visible behind the
-       whole page rather than scoped only to its own section.
-       ============================================================ */
-    .parallaxbackground {
-      position: fixed;
-      top: 0;
+  /* ---------- header/nav -- identical pattern to index.html/about.html ---------- */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 997;
+    height: 80px;
+    background: transparent;
+    transition: all 0.5s;
+  }
+  header.header-scrolled {
+    background: #342220;
+    height: 60px;
+  }
+  header .container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 16px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  @media (min-width: 576px) { header .container { max-width: 540px; } }
+  @media (min-width: 768px) { header .container { max-width: 720px; } }
+  @media (min-width: 992px) { header .container { max-width: 960px; } }
+  @media (min-width: 1200px) { header .container { max-width: 1140px; } }
+  @media (min-width: 1400px) { header .container { max-width: 1320px; } }
+  header .logo img { height: auto; max-height: 130px; width: auto; display: block; padding: 0; margin: 0; }
+  header.header-scrolled .logo img { max-height: 90px; }
+  header nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+  }
+  header nav li { position: relative; }
+  header nav a {
+    display: flex;
+    align-items: center;
+    padding: 10px 0 10px 30px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: 0.3s;
+  }
+  header nav li > a { position: relative; }
+  header nav li > a::before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 3px;
+    left: 30px;
+    background-color: #fff;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out 0s;
+  }
+  header nav a:hover, header nav .active { color: #fff; }
+  header nav a:hover::before, header nav .active::before {
+    visibility: visible;
+    width: 25px;
+  }
+  header nav li:has(button) > a { padding: 0 0 0 30px; }
+  header nav li:has(button) > a::before { display: none; }
+  header nav button {
+    font-size: 15px;
+    display: inline-block;
+    outline: 0;
+    border: 0;
+    cursor: pointer;
+    will-change: box-shadow, transform;
+    background: radial-gradient(100% 100% at 100% 0%, #89E5FF 0%, #5468FF 100%);
+    box-shadow: 0px 0.01em 0.01em rgb(45 35 66 / 40%), 0px 0.3em 0.7em -0.01em rgb(45 35 66 / 30%), inset 0px -0.01em 0px rgb(58 65 111 / 50%);
+    padding: 0 2em;
+    border-radius: 0.3em;
+    color: #fff;
+    height: 2.6em;
+    text-shadow: 0 1px 0 rgb(0 0 0 / 40%);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    font-weight: 600;
+  }
+  header nav button:hover {
+    box-shadow: 0px 0.1em 0.2em rgb(45 35 66 / 40%), 0px 0.4em 0.7em -0.1em rgb(45 35 66 / 30%), inset 0px -0.1em 0px #3c4fe0;
+    transform: translateY(-0.1em);
+  }
+  header nav button:active {
+    box-shadow: inset 0px 0.1em 0.6em #3c4fe0;
+    transform: translateY(0em);
+  }
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  @media (max-width: 900px) {
+    .nav-toggle { display: block; }
+    header nav ul {
+      display: none;
+      position: absolute;
+      top: 100%;
       left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -1;
-      pointer-events: none;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      background: rgba(10, 6, 2, 0.96);
+      padding: 8px 0;
     }
+    header nav ul.open { display: flex; }
+    header nav li { padding: 12px 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+    header nav li:first-child { border-top: none; }
+    header nav li > a { padding: 0; }
+    header nav li > a::before { display: none; }
+  }
 
-    /* ============================================================
-       CALENDAR HERO
-       Fountain background image, full hero height, with an
-       "EVENT CALENDAR" title using the same gentle float animation
-       index.html uses on its logo (logo-float keyframes further
-       down in this file).
-       ============================================================ */
-    #hero.calendar-hero {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      margin: 0;
-      padding: 80px 0 0;
-      background: none;
-    }
+  /* ============================================================
+     CALENDAR HERO -- fountain background, floating heading image
+     (previously an "Event Calendar" text heading; swapped for the
+     matching hand-drawn heading art like every other page uses).
+     ============================================================ */
+  .calendar-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin: 0;
+    padding: 80px 20px 8vh;
+  }
+  .calendar-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+  }
+  .calendar-hero-heading-img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: min(88vw, 820px);
+    height: auto;
+    /* EventCalendar.png has transparent canvas padding -- the
+       visible art only spans roughly the middle 52% of the image
+       (measured: ~23% empty above, ~25% empty below). Pulling that
+       dead space back in with negative margins, same technique as
+       the other pages' heading images. */
+    margin: -22% 0 -25%;
+    filter:
+      drop-shadow(0 8px 24px rgba(0, 0, 0, 0.75))
+      drop-shadow(0 2px 8px rgba(0, 0, 0, 0.9))
+      drop-shadow(0 0 12px rgba(239, 157, 109, 0.4));
+    animation: logo-float 3s ease-in-out infinite;
+  }
 
-    .calendar-hero-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      z-index: 0;
-    }
+  /* ============================================================
+     CALENDAR SECTION -- VERTICAL PATHWAY SCATTER
+     Same approach as the Competitions rock-scatter on index.html:
+     planks are placed at percentage top/left coordinates within a
+     tall vertical stage so the layout is identical on every screen
+     size (scales as a unit rather than reflowing). Left column:
+     26-36%, Right column: 64-74% alternating path. No text heading
+     here anymore -- the hero above already carries it.
+     ============================================================ */
+  .calendar-section {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    overflow: hidden;
+    padding: 50px 0 120px;
+  }
 
-    .calendar-heading {
-      position: relative;
-      z-index: 3;
-      text-align: center;
-      padding: 80px 20px 20px;
-    }
+  .calendar-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    z-index: -1;
+    pointer-events: none;
+  }
 
-    .calendar-heading h2 {
-      font-family: 'Cinzel', serif;
-      font-weight: 800;
-      font-size: clamp(28px, 5vw, 48px);
-      color: #FCDD8B;
-      text-shadow: 0 0 12px #B8BE49, 0 0 30px rgba(239, 157, 109, 0.35);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin: 0;
-    }
+  .plank-scatter {
+    position: relative;
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    height: 420vh;
+    z-index: 1;
+  }
 
-    .calendar-hero-title {
-      position: relative;
-      z-index: 1;
-      font-family: 'Cinzel', serif;
-      font-weight: 800;
-      font-size: clamp(36px, 7vw, 84px);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #FCDD8B;
-      text-shadow: 0 0 15px #B8BE49, 0 0 35px rgba(239, 157, 109, 0.5);
-      text-align: center;
-      padding: 0 20px;
-      animation: logo-float 3s ease-in-out infinite;
-    }
+  .plank-card {
+    position: absolute;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    font-size: 0;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+    transform: translate(-50%, -50%) scale(var(--depth-scale, 1));
+    transition: transform 0.3s ease;
+  }
 
-    @keyframes logo-float {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.02);
-      }
-    }
+  .plank-card:hover,
+  .plank-card:focus-visible {
+    transform: translate(-50%, -50%) scale(calc(var(--depth-scale, 1) * 1.06));
+  }
 
-    /* ============================================================
-       CALENDAR SECTION — VERTICAL PATHWAY SCATTER
-       Same approach as the Competitions rock-scatter on index.html:
-       planks are placed at percentage top/left coordinates within a
-       tall vertical stage so the layout is identical on every
-       screen size (scales as a unit rather than reflowing).
-       Left column: 26-36%, Right column: 64-74% alternating path.
-       ============================================================ */
-    .calendar-section {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      overflow: hidden;
-      padding-bottom: 120px;
-    }
+  .plank-card:active {
+    outline: none;
+  }
 
-    .calendar-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100% !important;
-      max-width: none !important;
-      height: 100% !important;
-      object-fit: cover;
-      object-position: top;
-      z-index: -1;
-      pointer-events: none;
-    }
+  .plank-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.45))
+            drop-shadow(0 0 18px rgba(252,221,139,0.5))
+            drop-shadow(0 0 32px rgba(184,190,73,0.3));
+    transition: filter 0.3s ease;
+  }
 
-    .plank-scatter {
-      position: relative;
-      width: 100%;
-      max-width: 1300px;
-      margin: 0 auto;
-      height: 420vh;
-      z-index: 1;
-    }
+  .plank-card:hover img,
+  .plank-card:focus-visible img {
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5))
+            drop-shadow(0 0 24px rgba(252,221,139,0.8))
+            drop-shadow(0 0 44px rgba(184,190,73,0.5));
+  }
 
-    .plank-card {
-      position: absolute !important;
-      cursor: pointer !important;
-      border: none !important;
-      outline: none !important;
-      background: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      height: auto !important;
-      aspect-ratio: 1 / 1 !important;
-      font-size: 0 !important;
-      appearance: none !important;
-      -webkit-appearance: none !important;
-      -webkit-tap-highlight-color: transparent;
-      will-change: transform;
-      transform: translate(-50%, -50%) scale(var(--depth-scale, 1)) !important;
-      transition: transform 0.3s ease !important;
-    }
+  .plank-card span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    font-family: 'Cinzel', serif;
+    font-weight: 800;
+    font-size: clamp(13px, 1.5vw, 18px);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #2C1205;
+    text-align: center;
+    padding: 0 20%;
+    text-shadow:
+      0 0 8px rgba(255, 210, 60, 0.9),
+      0 0 16px rgba(255, 180, 20, 0.7),
+      0 0 28px rgba(255, 160, 0, 0.5);
+    pointer-events: none;
+  }
 
-    .plank-card:hover,
-    .plank-card:focus-visible {
-      transform: translate(-50%, -50%) scale(calc(var(--depth-scale, 1) * 1.06)) !important;
-    }
+  /* ============================================================
+     PLANK DETAIL PANEL
+     ============================================================ */
+  .plank-detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 30, 28, 0.78);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 24px;
+  }
 
-    .plank-card:active {
-      transform: translate(-50%, -50%) scale(calc(var(--depth-scale, 1) * 1.06)) !important;
-      outline: none !important;
-    }
+  .plank-detail-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
-    .plank-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.45))
-              drop-shadow(0 0 18px rgba(252,221,139,0.5))
-              drop-shadow(0 0 32px rgba(184,190,73,0.3));
-      transition: filter 0.3s ease;
-    }
+  .plank-detail-card {
+    position: relative;
+    background: rgba(20, 38, 34, 0.95);
+    border: 2px solid rgba(252, 221, 139, 0.45);
+    border-radius: 26px;
+    max-width: 480px;
+    width: 100%;
+    padding: 44px 36px 40px;
+    text-align: center;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+    transform: translateY(24px) scale(0.96);
+    transition: transform 0.35s ease;
+  }
 
-    .plank-card:hover img,
-    .plank-card:focus-visible img {
-      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5))
-              drop-shadow(0 0 24px rgba(252,221,139,0.8))
-              drop-shadow(0 0 44px rgba(184,190,73,0.5));
-    }
+  .plank-detail-overlay.active .plank-detail-card {
+    transform: translateY(0) scale(1);
+  }
 
-    .plank-card span {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1;
-      font-family: 'Cinzel', serif;
-      font-weight: 800;
-      font-size: clamp(13px, 1.5vw, 18px);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: #2C1205;
-      text-align: center;
-      padding: 0 20%;
-      text-shadow:
-        0 0 8px rgba(255, 210, 60, 0.9),
-        0 0 16px rgba(255, 180, 20, 0.7),
-        0 0 28px rgba(255, 160, 0, 0.5);
-      pointer-events: none;
-    }
-    /* ============================================================
-       PLANK DETAIL PANEL
-       ============================================================ */
-    .plank-detail-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 30, 28, 0.78);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      padding: 24px;
-    }
+  .plank-detail-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 800;
+    font-size: clamp(24px, 4.5vw, 34px);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #FCDD8B;
+    text-shadow: 0 0 14px #B8BE49;
+    margin: 0 0 12px;
+  }
 
-    .plank-detail-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+  .plank-detail-desc {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 28px;
+  }
 
-    .plank-detail-card {
-      position: relative;
-      background: rgba(20, 38, 34, 0.95);
-      border: 2px solid rgba(252, 221, 139, 0.45);
-      border-radius: 26px;
-      max-width: 480px;
-      width: 100%;
-      padding: 44px 36px 40px;
-      text-align: center;
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
-      transform: translateY(24px) scale(0.96);
-      transition: transform 0.35s ease;
-    }
+  .plank-countdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(10px, 2vw, 18px);
+  }
 
-    .plank-detail-overlay.active .plank-detail-card {
-      transform: translateY(0) scale(1);
-    }
+  .plank-countdown-unit {
+    background: rgba(252, 221, 139, 0.08);
+    border: 1px solid rgba(252, 221, 139, 0.25);
+    border-radius: 14px;
+    padding: 16px 6px;
+  }
 
-    .plank-detail-title {
-      font-family: 'Cinzel', serif;
-      font-weight: 800;
-      font-size: clamp(24px, 4.5vw, 34px);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #FCDD8B;
-      text-shadow: 0 0 14px #B8BE49;
-      margin: 0 0 12px;
-    }
+  .plank-countdown-digits {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    margin-bottom: 6px;
+  }
 
-    .plank-detail-desc {
-      font-family: 'Open Sans', sans-serif;
-      color: rgba(255, 255, 255, 0.85);
-      font-size: 15px;
-      line-height: 1.6;
-      margin: 0 0 28px;
-    }
+  .plank-countdown-digits img {
+    height: clamp(34px, 6.5vw, 54px);
+    max-width: none;
+    width: auto;
+    filter: drop-shadow(0 0 10px #B8BE49);
+  }
 
-    .plank-countdown {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: clamp(10px, 2vw, 18px);
-    }
+  .plank-countdown-label {
+    display: block;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: clamp(9px, 1.2vw, 11px);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #FCDD8B;
+  }
 
-    .plank-countdown-unit {
-      background: rgba(252, 221, 139, 0.08);
-      border: 1px solid rgba(252, 221, 139, 0.25);
-      border-radius: 14px;
-      padding: 16px 6px;
-    }
+  .plank-countdown-passed {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #FCDD8B;
+    font-weight: 700;
+    font-size: 16px;
+    margin: 4px 0 0;
+  }
 
-    .plank-countdown-digits {
-      display: flex;
-      justify-content: center;
-      gap: 3px;
-      margin-bottom: 6px;
-    }
+  .plank-detail-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: none;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    height: auto;
+    padding: 0;
+    color: #FCDD8B;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
 
-    .plank-countdown-digits img {
-      height: clamp(34px, 6.5vw, 54px) !important;
-      max-width: none !important;
-      width: auto !important;
-      filter: drop-shadow(0 0 10px #B8BE49);
-    }
+  .plank-detail-close:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 
-    .plank-countdown-label {
-      display: block;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 600;
-      font-size: clamp(9px, 1.2vw, 11px);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: #FCDD8B;
-    }
+  /* Bigger tap targets on mobile only. */
+  @media (max-width: 768px) {
+    .plank-card { width: 32% !important; }
+  }
 
-    .plank-countdown-passed {
-      font-family: 'Open Sans', sans-serif;
-      color: #FCDD8B;
-      font-weight: 700;
-      font-size: 16px;
-      margin: 4px 0 0;
-    }
-
-    .plank-detail-close {
-      position: absolute;
-      top: 14px;
-      right: 18px;
-      background: none !important;
-      border: none !important;
-      box-shadow: none !important;
-      outline: none !important;
-      height: auto !important;
-      padding: 0 !important;
-      color: #FCDD8B;
-      font-size: 30px;
-      line-height: 1;
-      cursor: pointer;
-      opacity: 0.8;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .plank-detail-close:hover {
-      opacity: 1;
-      transform: scale(1.1);
-    }
-
-    #header .logo img {
-      max-height: 200px !important;
-    }
-
-    /* Remove the green bottom-fade overlay (from #hero::after in style.css)
-       just for this calendar page's hero, without touching index.html's hero. */
-    #hero.calendar-hero::after {
-      content: none;
-      background: none;
-    }
-  </style>
+  /* ============================================================
+     FOOTER (identical to index.html/about.html)
+     ============================================================ */
+  #footer {
+    background: #456825;
+    padding: 50px 24px 30px;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 -40px 50px -20px rgba(0, 0, 0, 0.5);
+  }
+  .footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .footer-left { flex: 0 0 auto; }
+  .footer-favicon { width: 170px; height: auto; }
+  .footer-center { flex: 1; text-align: center; min-width: 200px; }
+  .footer-center-logo { max-width: 595px; width: 100%; height: auto; }
+  .footer-right { flex: 0 0 auto; text-align: right; }
+  .social-media-icons { margin-bottom: 15px; }
+  .social-media-icons a {
+    color: #fff;
+    margin-left: 12px;
+    transition: opacity 0.3s;
+    display: inline-flex;
+    vertical-align: middle;
+  }
+  .social-media-icons a:hover { opacity: 0.7; }
+  .social-media-icons svg { width: 22px; height: 22px; fill: currentColor; }
+  .footer-contact { margin-top: 10px; }
+  .footer-contact p { margin: 0; font-weight: 500; line-height: 1.6; }
+  .contact-name { font-weight: 700; font-size: 15px; }
+  .contact-whatsapp a {
+    color: #fff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+  }
+  .contact-whatsapp a:hover { text-decoration: underline; }
+  .copyright {
+    border-top: 1px solid rgba(255,255,255,0.3);
+    text-align: center;
+    padding-top: 30px;
+    margin-top: 40px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @media (max-width: 768px) {
+    .footer-content { flex-direction: column; text-align: center; gap: 25px; }
+    .footer-right { text-align: center; }
+    .social-media-icons a { margin: 0 8px; }
+    .footer-favicon { width: 80px; height: 80px; }
+    .footer-center-logo { max-width: 250px; }
+  }
+</style>
 </head>
 
 <body>
 
-
-  <header id="header" class="fixed-top d-flex align-items-center header-transparent header">
-    <div class="container d-flex align-items-center justify-content-between">
-
-      <div class="logo">
-        <a href="index.html"><img src="assets/img/navbar-logo.webp" alt="" class="img-fluid"></a>
-      </div>
-
-      <nav id="navbar" class="navbar">
-        <ul>
-          <li><a class="nav-link scrollto" href="index.html">Home</a></li>
-          <li><a class="nav-link scrollto" href="index.html#competitions">Competitions</a></li>
-          <li><a class="nav-link scrollto" href="about.html">About</a></li>
-          <li><a class="nav-link scrollto active" href="calendar.html">Calendar</a></li>
-          <li><a href="https://regist.fortelations.com/"><button>Registration</button></a></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
-
+<header>
+  <div class="container">
+    <div class="logo">
+      <a href="index.html"><img src="assets/img/navbar-logo.webp" alt=""></a>
     </div>
-  </header>
+    <nav>
+      <ul id="navList">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#competitions">Competitions</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="calendar.html" class="active">Calendar</a></li>
+        <li><a href="https://regist.fortelations.com/"><button>Registration</button></a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+    </nav>
+  </div>
+</header>
 
-  <section id="hero" class="calendar-hero">
-    <img src="assets/img/BACKGROUND_FOUNTAIN.png" class="calendar-hero-bg" loading="lazy" alt="">
-    <h1 class="calendar-hero-title">Event Calendar</h1>
-  </section>
+<section class="calendar-hero">
+  <img src="assets/img/BACKGROUND_FOUNTAIN.png" class="calendar-hero-bg" alt="" loading="eager">
+  <img src="assets/img/headings/EventCalender.png" class="calendar-hero-heading-img" alt="Event Calendar" loading="eager">
+</section>
 
-  <section class="calendar-section" id="calendarSection">
-    <img src="assets/img/BACKGROUND FOUNTAIN 2.png" class="calendar-bg" id="calendarBg" loading="lazy" alt="">
+<section class="calendar-section" id="calendarSection">
+  <img src="assets/img/BACKGROUND FOUNTAIN 2.png" class="calendar-bg" id="calendarBg" loading="lazy" alt="">
+  <div class="plank-scatter" id="plankScatter"></div>
+</section>
 
-    <div class="calendar-heading">
-      <h2>Event Calendar</h2>
-    </div>
+<!-- Detail panel shown when a plank is clicked -->
+<div class="plank-detail-overlay" id="plankOverlay">
+  <div class="plank-detail-card">
+    <button class="plank-detail-close" id="plankClose" aria-label="Close">&times;</button>
+    <h3 class="plank-detail-title" id="plankDetailTitle"></h3>
+    <p class="plank-detail-desc" id="plankDetailDesc"></p>
 
-    <div class="plank-scatter" id="plankScatter"></div>
-  </section>
-
-  <!-- Detail panel shown when a plank is clicked -->
-  <div class="plank-detail-overlay" id="plankOverlay">
-    <div class="plank-detail-card">
-      <button class="plank-detail-close" id="plankClose" aria-label="Close">&times;</button>
-      <h3 class="plank-detail-title" id="plankDetailTitle"></h3>
-      <p class="plank-detail-desc" id="plankDetailDesc"></p>
-
-      <div class="plank-countdown" id="plankCountdown">
-        <div class="plank-countdown-unit">
-          <div class="plank-countdown-digits" id="plankDays"></div>
-          <span class="plank-countdown-label">Days</span>
-        </div>
-        <div class="plank-countdown-unit">
-          <div class="plank-countdown-digits" id="plankHours"></div>
-          <span class="plank-countdown-label">Hours</span>
-        </div>
-        <div class="plank-countdown-unit">
-          <div class="plank-countdown-digits" id="plankMinutes"></div>
-          <span class="plank-countdown-label">Minutes</span>
-        </div>
-        <div class="plank-countdown-unit">
-          <div class="plank-countdown-digits" id="plankSeconds"></div>
-          <span class="plank-countdown-label">Seconds</span>
-        </div>
+    <div class="plank-countdown" id="plankCountdown">
+      <div class="plank-countdown-unit">
+        <div class="plank-countdown-digits" id="plankDays"></div>
+        <span class="plank-countdown-label">Days</span>
       </div>
-      <p class="plank-countdown-passed" id="plankCountdownPassed" style="display:none;">This day has already arrived!</p>
+      <div class="plank-countdown-unit">
+        <div class="plank-countdown-digits" id="plankHours"></div>
+        <span class="plank-countdown-label">Hours</span>
+      </div>
+      <div class="plank-countdown-unit">
+        <div class="plank-countdown-digits" id="plankMinutes"></div>
+        <span class="plank-countdown-label">Minutes</span>
+      </div>
+      <div class="plank-countdown-unit">
+        <div class="plank-countdown-digits" id="plankSeconds"></div>
+        <span class="plank-countdown-label">Seconds</span>
+      </div>
+    </div>
+    <p class="plank-countdown-passed" id="plankCountdownPassed" style="display:none;">This day has already arrived!</p>
+  </div>
+</div>
+
+<footer id="footer">
+  <div class="footer-content">
+    <div class="footer-left">
+      <video src="assets/img/rusa-loop.webm" class="footer-favicon" autoplay loop muted playsinline></video>
+    </div>
+    <div class="footer-center">
+      <img src="assets/img/Sylvara.webp" class="footer-center-logo" alt="">
+    </div>
+    <div class="footer-right">
+      <div class="social-media-icons">
+        <a href="https://www.instagram.com/fortelations/?hl=en" target="_blank" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.25.07 1.63.07 4.81s-.01 3.56-.07 4.81c-.15 3.23-1.66 4.77-4.92 4.92-1.25.06-1.63.07-4.85.07s-3.6-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.25-.07-1.63-.07-4.81s.01-3.56.07-4.81C2.38 3.96 3.9 2.42 7.15 2.27 8.4 2.21 8.78 2.2 12 2.2zm0 1.8c-3.17 0-3.55.01-4.8.07-2.32.11-3.35 1.16-3.46 3.46-.06 1.25-.07 1.63-.07 4.47s.01 3.22.07 4.47c.11 2.3 1.14 3.35 3.46 3.46 1.25.06 1.63.07 4.8.07s3.55-.01 4.8-.07c2.32-.11 3.35-1.16 3.46-3.46.06-1.25.07-1.63.07-4.47s-.01-3.22-.07-4.47c-.11-2.3-1.14-3.35-3.46-3.46-1.25-.06-1.63-.07-4.8-.07zm0 3.4a5.4 5.4 0 1 1 0 10.8 5.4 5.4 0 0 1 0-10.8zm0 1.8a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2zm5.6-2.1a1.26 1.26 0 1 1 0 2.52 1.26 1.26 0 0 1 0-2.52z"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@fortelations" target="_blank" aria-label="TikTok">
+          <svg viewBox="0 0 24 24"><path d="M16.6 2h-3.2v13.1a2.9 2.9 0 1 1-2.05-2.77V9.05a6.1 6.1 0 1 0 5.25 6.05V8.36a7.6 7.6 0 0 0 4.4 1.4V6.55a4.4 4.4 0 0 1-4.4-4.4z"/></svg>
+        </a>
+        <a href="https://www.youtube.com/@smak7penabur" target="_blank" aria-label="YouTube">
+          <svg viewBox="0 0 24 24"><path d="M23.5 6.5a3 3 0 0 0-2.1-2.1C19.5 4 12 4 12 4s-7.5 0-9.4.4A3 3 0 0 0 .5 6.5 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.5 3 3 0 0 0 2.1 2.1C4.5 20 12 20 12 20s7.5 0 9.4-.4a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.5zM9.6 15.5v-7l6.2 3.5z"/></svg>
+        </a>
+        <a href="mailto:aksenfortelations@gmail.com" aria-label="Email">
+          <svg viewBox="0 0 24 24"><path d="M2 5.5A1.5 1.5 0 0 1 3.5 4h17A1.5 1.5 0 0 1 22 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 18.5v-13zm2.1.5 7.9 6.2L19.9 6H4.1zM20 8.1l-7.4 5.8a1 1 0 0 1-1.2 0L4 8.1V18h16V8.1z"/></svg>
+        </a>
+      </div>
+      <div class="footer-contact">
+        <p class="contact-name">Nathanael Edgar</p>
+        <p class="contact-whatsapp">
+          <a href="https://wa.me/628125000318">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5C11 9.3 10.5 8 10.3 7.5c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.1 3c.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2 0-.1-.2-.2-.5-.3zM12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
+            +62 812-5000-318
+          </a>
+        </p>
+      </div>
     </div>
   </div>
+  <div class="copyright">
+    &copy; Copyright <strong><span>Fortelation</span></strong> 2026. All Rights Reserved
+  </div>
+</footer>
 
-  <footer id="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-left">
-          <video src="assets/img/rusa-loop.webm" class="footer-favicon" autoplay loop muted playsinline></video>
-        </div>
-        <div class="footer-center">
-          <img src="assets/img/Sylvara.webp" class="footer-center-logo">
-        </div>
-        <div class="footer-right">
-          <div class="social-media-icons">
-            <a href="https://www.instagram.com/fortelations/?hl=en" target="_blank"><i class='bx bxl-instagram'></i></a>
-            <a href="https://www.tiktok.com/@fortelations" target="_blank"><i class='bx bxl-tiktok'></i></a>
-            <a href="https://www.youtube.com/@smak7penabur" target="_blank"><i class='bx bxl-youtube'></i></a>
-            <a href="mailto:aksenfortelations@gmail.com"><i class='bx bx-envelope'></i></a>
-          </div>
-          <div class="footer-contact">
-            <p class="contact-name">Nathanael Edgar</p>
-            <p class="contact-whatsapp"><a href="https://wa.me/628125000318"><i class='bx bxl-whatsapp'></i> +62 812-5000-318</a></p>
-          </div>
-        </div>
-      </div>
-      <div class="copyright">
-        &copy; Copyright <strong><span>Fortelation</span></strong> 2026. All Rights Reserved
-      </div>
-    </div>
-  </footer>
-
-  
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-  <div id="preloader"></div>
-
-  
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@latest"></script>
-  <script src="https://unpkg.com/split-type"></script>
-    
-  <script src="assets/js/main.js"></script>
 <script>
+  const navToggle = document.getElementById('navToggle');
+  const navList = document.getElementById('navList');
+  if (navToggle && navList) {
+    navToggle.addEventListener('click', () => {
+      const isOpen = navList.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+  }
+
+  const headerEl = document.querySelector('header');
+  if (headerEl) {
+    const updateHeaderScrolled = () => {
+      headerEl.classList.toggle('header-scrolled', window.scrollY > 100);
+    };
+    window.addEventListener('scroll', updateHeaderScrolled);
+    updateHeaderScrolled();
+  }
+
   /* ============================================================
-     CALENDAR PAGE — VERTICAL PATHWAY SCATTER
+     CALENDAR PAGE -- VERTICAL PATHWAY SCATTER
      Mirrors the Competitions rock-scatter approach from index.html:
      planks are placed at fixed percentage top/left coordinates so
-     the layout is identical on every screen size. No GSAP/Lenis
-     scroll-driven animation here -- just CSS-positioned planks
-     the user scrolls past naturally as the page scrolls down.
+     the layout is identical on every screen size. No scroll-driven
+     animation here -- just CSS-positioned planks the user scrolls
+     past naturally as the page scrolls down.
 
      Each plank entry carries:
        label : display title shown on the plank
@@ -641,6 +789,6 @@
     if (e.key === 'Escape') closePlankDetail();
   });
 </script>
-</body>
 
+</body>
 </html>
