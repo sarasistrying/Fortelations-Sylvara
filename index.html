@@ -225,6 +225,16 @@
 
   .forest-bg { z-index: 1; object-position: center; }
 
+  /* Pond.webp's real art is a thin strip near the bottom of a
+     mostly-transparent 3840x2160 canvas (content only spans
+     roughly y 71%-100%, centered horizontally) -- object-position
+     bottom keeps that strip anchored to the bottom edge regardless
+     of viewport aspect, instead of risking it getting cropped off
+     on unusually wide/short windows. Sits above the plain
+     background but below the mid-distance and near corner trees,
+     so it reads as a ground-level clearing between them. */
+  .forest-pond { z-index: 2; object-position: center bottom; }
+
   .forest-trees {
     position: absolute;
     top: 0; right: 0; bottom: 0; left: 0;
@@ -555,7 +565,7 @@
     background: rgba(20, 38, 34, 0.95);
     border: 2px solid rgba(252, 221, 139, 0.45);
     border-radius: 26px;
-    max-width: 480px;
+    max-width: 860px;
     width: 100%;
     padding: 44px 36px 40px;
     text-align: center;
@@ -576,12 +586,46 @@
     text-shadow: 0 0 14px #B8BE49;
     margin: 0 0 12px;
   }
+  /* Body row: photo on the left, description text on the right.
+     When a stone has no photo (rock-detail-card.no-photo), the desc
+     just stays centered on its own like before -- see the modifier
+     rules below instead of duplicating the whole block. */
+  .rock-detail-body {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-align: left;
+  }
+  .rock-detail-card.no-photo .rock-detail-body {
+    justify-content: center;
+    text-align: center;
+  }
+  .rock-detail-photo {
+    flex: 0 0 auto;
+    width: clamp(220px, 34vw, 420px);
+    height: clamp(280px, 42vw, 520px);
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
+  }
+  .rock-detail-card.no-photo .rock-detail-photo {
+    display: none;
+  }
   .rock-detail-desc {
     font-family: 'Open Sans', sans-serif;
     color: rgba(255, 255, 255, 0.85);
     font-size: 15px;
     line-height: 1.6;
     margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  @media (max-width: 700px) {
+    .rock-detail-body {
+      flex-direction: column;
+      text-align: center;
+    }
+    .rock-detail-photo { width: clamp(180px, 60vw, 300px); height: clamp(220px, 70vw, 340px); }
   }
   .rock-detail-close {
     position: absolute;
@@ -870,10 +914,12 @@
 
     <img src="assets/img/FOREST/Background.jpeg" class="forest-layer forest-bg" alt="" loading="eager">
 
+    <img src="assets/img/FOREST/Pond.webp" class="forest-layer forest-pond" id="forestPond" alt="" loading="eager">
+
     <div class="forest-trees" id="forestTrees"></div>
 
-    <img src="assets/img/FOREST/TreeLeft_NearMid.png" class="forest-layer forest-near forest-near-left" id="forestNearLeft" alt="" loading="eager">
-    <img src="assets/img/FOREST/TreeRight_NearMid.png" class="forest-layer forest-near forest-near-right" id="forestNearRight" alt="" loading="eager">
+    <img src="assets/img/FOREST/left.webp" class="forest-layer forest-near forest-near-left" id="forestNearLeft" alt="" loading="eager">
+    <img src="assets/img/FOREST/right.webp" class="forest-layer forest-near forest-near-right" id="forestNearRight" alt="" loading="eager">
 
     <div class="forest-logo" id="forestLogo">
       <img src="assets/img/Sylvara.webp" alt="Sylvara">
@@ -935,7 +981,10 @@
     <div class="rock-detail-card">
       <button class="rock-detail-close" id="rockClose" aria-label="Close">&times;</button>
       <h3 class="rock-detail-title" id="rockDetailTitle"></h3>
-      <p class="rock-detail-desc" id="rockDetailDesc"></p>
+      <div class="rock-detail-body" id="rockDetailBody">
+        <img class="rock-detail-photo" id="rockDetailPhoto" alt="">
+        <p class="rock-detail-desc" id="rockDetailDesc"></p>
+      </div>
     </div>
   </div>
 
@@ -1168,6 +1217,14 @@
     tl.fromTo('#forestLogo', { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.55, y: -40, duration: 1.6, ease: 'power1.in' }, 0.3);
     tl.to('.forest-bg', { scale: 1.3, duration: 4.2, ease: 'none' }, 0.2);
 
+    // Pond: a gentle zoom in step with the background (it reads as
+    // part of that same ground-level scene), then fades out on the
+    // same schedule as the near corner trees so the whole flythrough
+    // clears together instead of the pond lingering after everything
+    // else has gone.
+    tl.to('#forestPond', { scale: 1.15, duration: 4.2, ease: 'none' }, 0.2);
+    tl.to('#forestPond', { opacity: 0, duration: 2.0 }, 3.0);
+
     tl.fromTo('.forest-tree-farmid', { scale: 1 }, { scale: 2.2, duration: 2.6, ease: 'power1.in' }, 0.2);
     tl.to('.forest-tree-farmid', { opacity: 0, duration: 0.8, ease: 'power1.in' }, 1.8);
 
@@ -1268,25 +1325,25 @@
 
   // ---------- Competitions: rock scatter ----------
   const COMPETITIONS = [
-    { file: "Band",           label: "Band",                desc: "Bands bring full-stage energy, battling it out for the loudest cheer in the house.",            top: 3.3,  left: 26.3, z: 3 },
-    { file: "VocalGroup",     label: "Vocal Group",         desc: "Harmonies collide as vocal ensembles take the stage together.",                                 top: 7.6,  left: 66.2, z: 2 },
+    { file: "Band",           label: "Band",                desc: "Bands bring full-stage energy, battling it out for the loudest cheer in the house.",            top: 3.3,  left: 26.3, z: 3, photo: "band" },
+    { file: "VocalGroup",     label: "Vocal Group",         desc: "Harmonies collide as vocal ensembles take the stage together.",                                 top: 7.6,  left: 66.2, z: 2, photo: "vocalgroup" },
     { file: "SoloSinging",    label: "Solo Singing",        desc: "One voice, one stage — solo singers go all in for the spotlight.",                              top: 13.9, left: 32.8, z: 4 },
-    { file: "Monolog",        label: "Monolog",             desc: "A single performer, a single story, told with everything they've got.",                          top: 19.4, left: 64.9, z: 1 },
-    { file: "MembacaPuisi",   label: "Membaca Puisi",       desc: "Poetry reading competition celebrating rhythm, emotion, and delivery.",                          top: 23.5, left: 26.3, z: 2 },
-    { file: "EnglishSpeech",  label: "English Speech",      desc: "Speakers take the floor to persuade, inform, and inspire in English.",                           top: 28.2, left: 69.1, z: 3 },
-    { file: "MUN",            label: "MUN",                 desc: "Model United Nations — delegates debate global issues with diplomacy and wit.",                  top: 32.9, left: 28.0, z: 2 },
-    { file: "Chess",          label: "Chess",               desc: "Sixty-four squares, endless strategy. May the sharpest mind win.",                               top: 39.5, left: 69.4, z: 5 },
-    { file: "MD",             label: "Mobile Dev",          desc: "Builders and coders compete to ship the sharpest mobile creations.",                             top: 43.7, left: 31.9, z: 1 },
-    { file: "ML",             label: "Mobile Legends",      desc: "Squads clash in Mobile Legends: Bang Bang for esports glory.",                                   top: 50.2, left: 64.1, z: 3 },
-    { file: "Basket",         label: "Basketball",          desc: "Fast breaks, full courts, and the chase for the winning basket.",                                top: 55.4, left: 33.0, z: 2 },
-    { file: "Futsal",         label: "Futsal",              desc: "Five-a-side football at full speed in a tighter, faster arena.",                                 top: 59.4, left: 65.6, z: 2 },
-    { file: "Floorball",      label: "Floorball",           desc: "Fast sticks and faster feet — floorball brings the floor to life.",                              top: 66.1, left: 29.4, z: 3 },
+    { file: "Monolog",        label: "Monolog",             desc: "A single performer, a single story, told with everything they've got.",                          top: 19.4, left: 64.9, z: 1, photo: "Monolog" },
+    { file: "MembacaPuisi",   label: "Membaca Puisi",       desc: "Poetry reading competition celebrating rhythm, emotion, and delivery.",                          top: 23.5, left: 26.3, z: 2, photo: "Puisi" },
+    { file: "EnglishSpeech",  label: "English Speech",      desc: "Speakers take the floor to persuade, inform, and inspire in English.",                           top: 28.2, left: 69.1, z: 3, photo: "English Speech" },
+    { file: "MUN",            label: "MUN",                 desc: "Model United Nations — delegates debate global issues with diplomacy and wit.",                  top: 32.9, left: 28.0, z: 2, photo: "MUN" },
+    { file: "Chess",          label: "Chess",               desc: "Sixty-four squares, endless strategy. May the sharpest mind win.",                               top: 39.5, left: 69.4, z: 5, photo: "Chess" },
+    { file: "MD",             label: "Modern Dance",        desc: "Dancers bring bold choreography and rhythm to life on stage.",                                  top: 43.7, left: 31.9, z: 1 },
+    { file: "ML",             label: "Mobile Legends",      desc: "Squads clash in Mobile Legends: Bang Bang for esports glory.",                                   top: 50.2, left: 64.1, z: 3, photo: "ML" },
+    { file: "Basket",         label: "Basketball",          desc: "Fast breaks, full courts, and the chase for the winning basket.",                                top: 55.4, left: 33.0, z: 2, photo: "Basket" },
+    { file: "Futsal",         label: "Futsal",              desc: "Five-a-side football at full speed in a tighter, faster arena.",                                 top: 59.4, left: 65.6, z: 2, photo: "Futsal" },
+    { file: "Floorball",      label: "Floorball",           desc: "Fast sticks and faster feet — floorball brings the floor to life.",                              top: 66.1, left: 29.4, z: 3, photo: "Floorball" },
     { file: "Bulutangkis",    label: "Bulutangkis",         desc: "Badminton rallies test reflex, footwork, and nerve.",                                            top: 69.2, left: 65.0, z: 1 },
-    { file: "Photography",   label: "Photography",         desc: "Capturing the moment, one frame at a time.",                                                    top: 76.2, left: 32.0, z: 4 },
-    { file: "Drawing",        label: "Drawing",             desc: "Traditional drawing competition showcasing raw artistic skill.",                                 top: 81.2, left: 71.3, z: 2 },
-    { file: "DigitalDrawing", label: "Digital Drawing",     desc: "Tablets and styluses replace pencils in this digital art showdown.",                             top: 85.8, left: 35.7, z: 2 },
-    { file: "MonSoonSim",     label: "MonSoonSim",          desc: "A business simulation competition testing strategy under pressure.",                            top: 90.5, left: 69.5, z: 1 },
-    { file: "CCA",            label: "CCA",                 desc: "Cross-category showcase honoring Sylvara's extracurricular spirit.",                            top: 96.8, left: 32.2, z: 2 },
+    { file: "Photography",   label: "Photography",         desc: "Capturing the moment, one frame at a time.",                                                    top: 76.2, left: 32.0, z: 4, photo: "Photography" },
+    { file: "Drawing",        label: "Drawing",             desc: "Traditional drawing competition showcasing raw artistic skill.",                                 top: 81.2, left: 71.3, z: 2, photo: "Drawing" },
+    { file: "DigitalDrawing", label: "Digital Drawing",     desc: "Tablets and styluses replace pencils in this digital art showdown.",                             top: 85.8, left: 35.7, z: 2, photo: "Digital Drawing" },
+    { file: "MonSoonSim",     label: "MonSoonSim",          desc: "A business simulation competition testing strategy under pressure.",                            top: 90.5, left: 69.5, z: 1, photo: "Moonsoonsim" },
+    { file: "CCA",            label: "CCA",                 desc: "Cross-category showcase honoring Sylvara's extracurricular spirit.",                            top: 96.8, left: 32.2, z: 2, photo: "CCA" },
   ];
 
   function buildRockScatter() {
@@ -1326,6 +1383,18 @@
   function openRockDetail(comp) {
     document.getElementById('rockDetailTitle').textContent = comp.label;
     document.getElementById('rockDetailDesc').textContent = comp.desc || '';
+
+    const card = document.querySelector('.rock-detail-card');
+    const photoEl = document.getElementById('rockDetailPhoto');
+    if (comp.photo) {
+      photoEl.src = `assets/img/Comps/${encodeURIComponent(comp.photo)}.png`;
+      photoEl.alt = comp.label;
+      card.classList.remove('no-photo');
+    } else {
+      photoEl.removeAttribute('src');
+      card.classList.add('no-photo');
+    }
+
     document.getElementById('rockOverlay').classList.add('active');
   }
 
