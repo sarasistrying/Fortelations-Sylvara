@@ -176,14 +176,28 @@
      already-proven version, just without style.css/Bootstrap
      fighting it in the background anymore)
      ============================================================ */
+  /* This section shares id="hero" with assets/css/style.css's own
+     #hero rule (background: url("Pure Background Animation.webp"),
+     height:100vh, padding:80px 0 0, display:flex...). An ID selector
+     always beats a class selector on specificity, so if that
+     stylesheet is ever loaded alongside this page, its #hero would
+     silently win over everything below -- most importantly height,
+     which would wreck the 450vh scroll distance the GSAP pin depends
+     on (this is the actual reason a background "won't change" no
+     matter what gets edited here: the real fight isn't over which
+     image is referenced, it's over which stylesheet's rule wins).
+     !important forces this version to win regardless. */
   .forest-hero-trigger {
-    position: relative;
-    display: block;
-    width: 100%;
-    height: 450vh;
-    padding: 0;
-    margin: 0;
-    overflow: visible;
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: 450vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    background: none !important;
+    justify-content: normal !important;
+    align-items: normal !important;
   }
 
   .forest-stage {
@@ -191,11 +205,46 @@
     display: block;
     top: 0; left: 0;
     width: 100vw;
-    height: 100vh;
-    height: 100dvh;
+    height: 100vh !important;
+    height: 100dvh !important;
     margin: 0; padding: 0;
     overflow: hidden;
     background: #0c1608;
+  }
+  /* The real fade to competitions -- lives directly on the pinned
+     stage itself, NOT inside #forestCountdown or on .forest-bg.
+     Reason: #forestCountdown gets tweened to opacity:0 by GSAP right
+     before the pin releases (tl.to('#forestCountdown', {opacity:0},
+     6.4)), and .forest-bg gets scaled up 1.3x over the scroll, which
+     crops its own baked-in edge fade out of frame. Both of those
+     fades were disappearing right at the exact moment the handoff to
+     competitions needed them most. This pseudo-element belongs to
+     .forest-stage's own box (not a `.forest-stage > *` child), so
+     it's untouched by both of those tweens and by the is-ready
+     opacity toggle -- it just stays put and visible the entire
+     scroll, including the last frame before unpinning. */
+  .forest-stage::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 42%;
+    /* Eased, not linear -- a plain transparent-to-solid gradient
+       reads as "nothing happens, then a wall" because the early,
+       mostly-transparent part barely registers against a bright
+       detailed picture. These extra stops front-load more of the
+       visible darkening into the first half of the band instead of
+       leaving it all for the last few percent, so it reads as a
+       gradual dissolve into the competitions section's flat green
+       instead of a hard cut. */
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(24, 43, 23, 0.25) 35%,
+      rgba(24, 43, 23, 0.65) 65%,
+      #182b17 100%
+    );
+    pointer-events: none;
+    z-index: 20;
   }
   /* Everything inside stays hidden (the dark background above acts
      as a natural loading placeholder) until JS has finished
@@ -230,10 +279,10 @@
      roughly y 71%-100%, centered horizontally) -- object-position
      bottom keeps that strip anchored to the bottom edge regardless
      of viewport aspect, instead of risking it getting cropped off
-     on unusually wide/short windows. Sits above the plain
-     background but below the mid-distance and near corner trees,
-     so it reads as a ground-level clearing between them. */
-  .forest-pond { z-index: 2; object-position: center bottom; }
+     on unusually wide/short windows. z-index bumped above literally
+     everything else in the stage, including the Sylvara logo (6)
+     and the leaf wipe (7), per request. */
+  .forest-pond { z-index: 8; object-position: center bottom; }
 
   .forest-trees {
     position: absolute;
@@ -273,8 +322,34 @@
     opacity: 1;
     transform: translateY(5vh);
   }
-  .forest-near-left { object-position: left bottom; }
-  .forest-near-right { object-position: right bottom; }
+  /* transform-origin matches object-position -- without this, the
+     GSAP scale/translate flythrough zooms from the element's dead
+     center (the default origin) while the visible artwork is
+     anchored to a bottom corner via object-position, so the two
+     drift apart as scale increases: the corner content can zoom
+     itself right out of frame instead of growing in place. Pinning
+     the origin to the same corner keeps the art anchored there
+     through the whole zoom. */
+  /* The vine/flower cluster in each source image reaches right up
+     to that image's own top edge, so it lands flush against the
+     browser's top edge with nothing above to soften it -- reading
+     as an abrupt chop instead of foliage trailing off naturally.
+     Fading that top sliver to transparent lets the dark scene
+     behind show through instead, turning the hard cut into a soft
+     vignette. */
+  .forest-near-left,
+  .forest-near-right {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 12%);
+  }
+  .forest-near-left {
+    object-position: left bottom;
+    transform-origin: left bottom;
+  }
+  .forest-near-right {
+    object-position: right bottom;
+    transform-origin: right bottom;
+  }
 
   /* ============================================================
      COUNTDOWN BACKDROP TREES -- reuses TreeLeft/TreeRight (the
@@ -344,6 +419,24 @@
     justify-content: center;
     padding: 80px 20px 50px;
     opacity: 0;
+    pointer-events: none;
+    background-image: url('assets/img/forest_path_faded.png?v=4') !important;
+    background-size: cover !important;
+    background-position: center bottom !important;
+  }
+  /* Fades the very bottom of the countdown area into the same dark
+     green used at the top of the competitions section below, so the
+     hero visually bridges into it instead of cutting off sharply.
+     Kept light -- forest_path_faded.png already has its own gentle
+     built-in fade, so this only needs to nudge the very edge, not
+     redo the whole job (a taller/stronger version here was washing
+     out the countdown boxes with green). */
+  .forest-countdown::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 18%;
+    background: linear-gradient(to bottom, transparent, #182b17);
     pointer-events: none;
   }
   .forest-countdown .countdown-timer {
@@ -438,6 +531,45 @@
     z-index: 2;
     width: 100%;
     padding-bottom: 160px;
+    /* BACKGROUND_COMPETITIONS.png doesn't actually exist in the
+       project (confirmed missing, not a display bug) -- until real
+       artwork is added, this is what shows through instead of the
+       page's default navy/purple body color. Matches the fade color
+       so a missing image reads as "seamless dark green" instead of
+       "reverted to some other unrelated background". */
+    background-color: #182b17;
+  }
+  /* Mirrors the countdown's bottom fade -- same dark green, fading
+     in from the top edge here, so the hero-to-competitions handoff
+     reads as one continuous blend rather than two sections just
+     stacked on top of each other. */
+  .competitions-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 260px;
+    background: linear-gradient(to bottom, #182b17, transparent);
+    z-index: 1;
+    pointer-events: none;
+  }
+  /* Bottom fade -- same eased-curve treatment as the hero's own fade,
+     using the darker near-black green from the requested swatch, so
+     the competitions-to-pathway handoff reads as one continuous
+     blend instead of a hard cut. */
+  .competitions-section::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 300px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(37, 40, 19, 0.25) 35%,
+      rgba(37, 40, 19, 0.65) 65%,
+      #252813 100%
+    );
+    z-index: 1;
+    pointer-events: none;
   }
   .competitions-heading {
     position: relative;
@@ -565,16 +697,47 @@
     background: rgba(20, 38, 34, 0.95);
     border: 2px solid rgba(252, 221, 139, 0.45);
     border-radius: 26px;
-    max-width: 860px;
+    max-width: 720px;
     width: 100%;
-    padding: 44px 36px 40px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 40px 36px 40px;
     text-align: center;
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
     transform: translateY(24px) scale(0.96);
     transition: transform 0.35s ease;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(252, 221, 139, 0.4) transparent;
   }
+  .rock-detail-card::-webkit-scrollbar { width: 8px; }
+  .rock-detail-card::-webkit-scrollbar-thumb { background: rgba(252, 221, 139, 0.35); border-radius: 8px; }
   .rock-detail-overlay.active .rock-detail-card {
     transform: translateY(0) scale(1);
+  }
+  /* Header: a small round portrait "seal" (cropped from the same
+     cutout art the old rock-detail-photo used) sitting above the
+     title, card-game-crest style, instead of a big rectangular photo
+     racing the text for space. Solves the awkward dead-space problem
+     a tall text column next to a short fixed-height photo used to
+     leave -- everything below is one clean full-width column now. */
+  .rock-detail-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .rock-detail-badge {
+    width: 108px;
+    height: 108px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 3px solid rgba(252, 221, 139, 0.55);
+    box-shadow: 0 0 0 6px rgba(252, 221, 139, 0.1), 0 10px 22px rgba(0, 0, 0, 0.5);
+    margin-bottom: 16px;
+  }
+  .rock-detail-card.no-photo .rock-detail-badge {
+    display: none;
   }
   .rock-detail-title {
     font-family: 'Cinzel', serif;
@@ -584,48 +747,7 @@
     text-transform: uppercase;
     color: #FCDD8B;
     text-shadow: 0 0 14px #B8BE49;
-    margin: 0 0 12px;
-  }
-  /* Body row: photo on the left, description text on the right.
-     When a stone has no photo (rock-detail-card.no-photo), the desc
-     just stays centered on its own like before -- see the modifier
-     rules below instead of duplicating the whole block. */
-  .rock-detail-body {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    text-align: left;
-  }
-  .rock-detail-card.no-photo .rock-detail-body {
-    justify-content: center;
-    text-align: center;
-  }
-  .rock-detail-photo {
-    flex: 0 0 auto;
-    width: clamp(220px, 34vw, 420px);
-    height: clamp(280px, 42vw, 520px);
-    object-fit: contain;
-    object-position: bottom;
-    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
-  }
-  .rock-detail-card.no-photo .rock-detail-photo {
-    display: none;
-  }
-  .rock-detail-desc {
-    font-family: 'Open Sans', sans-serif;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 15px;
-    line-height: 1.6;
-    margin: 0;
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-  @media (max-width: 700px) {
-    .rock-detail-body {
-      flex-direction: column;
-      text-align: center;
-    }
-    .rock-detail-photo { width: clamp(180px, 60vw, 300px); height: clamp(220px, 70vw, 340px); }
+    margin: 0 0 8px;
   }
   .rock-detail-close {
     position: absolute;
@@ -650,6 +772,181 @@
   }
 
   /* ============================================================
+     COMPETITION DETAIL EXTRA -- the condensed spec block (peserta /
+     format / waktu / biaya, hadiah, ketentuan singkat, contact).
+     One full-width column below the badge+title header (see
+     .rock-detail-header above). Kept as its own block so a stone
+     with no extra data (comp.detail undefined) just renders
+     nothing extra.
+     ============================================================ */
+  .comp-detail-extra { text-align: left; margin-top: 20px; }
+  .comp-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 26px;
+  }
+  .comp-detail-item { display: flex; gap: 12px; align-items: flex-start; }
+  .comp-detail-icon {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(252, 221, 139, 0.12);
+    border: 1px solid rgba(252, 221, 139, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .comp-detail-label {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0 0 4px;
+  }
+  .comp-detail-value {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.45;
+  }
+  .comp-section-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    color: #FCDD8B;
+    margin: 22px 0 12px;
+  }
+  .comp-variants {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .comp-variant-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(252, 221, 139, 0.18);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .comp-variant-tag {
+    display: inline-block;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #142310;
+    background: #FCDD8B;
+    border-radius: 6px;
+    padding: 3px 9px;
+    margin-bottom: 10px;
+  }
+  .comp-variant-row { margin-bottom: 9px; }
+  .comp-variant-row:last-child { margin-bottom: 0; }
+  .comp-variant-label {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 2px;
+  }
+  .comp-variant-value {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.45;
+  }
+  .comp-hadiah-group-label {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(252, 221, 139, 0.75);
+    margin: 14px 0 4px;
+  }
+  .comp-hadiah-group-label:first-child { margin-top: 0; }
+  .comp-hadiah-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13.5px;
+  }
+  .comp-hadiah-row:last-child { border-bottom: none; }
+  .comp-hadiah-row .comp-hadiah-key { color: rgba(255, 255, 255, 0.85); font-weight: 600; }
+  .comp-hadiah-row .comp-hadiah-val { color: #FCDD8B; font-weight: 700; text-align: right; }
+  .comp-ketentuan {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .comp-ketentuan li {
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 10px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .comp-ketentuan li:last-child { margin-bottom: 0; }
+  .comp-ketentuan li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #FCDD8B;
+  }
+  .comp-contact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .comp-contact-icon {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(252, 221, 139, 0.12);
+    border: 1px solid rgba(252, 221, 139, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .comp-contact-name {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .comp-contact-sub {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  @media (max-width: 640px) {
+    .comp-detail-grid { grid-template-columns: 1fr; }
+    .comp-variants { grid-template-columns: 1fr; }
+  }
+
+  /* ============================================================
      PATHWAY — two wooden signs
      ============================================================ */
   .pathway-section {
@@ -662,7 +959,43 @@
     justify-content: space-between;
     padding: 60px 6%;
     gap: 24px 20px;
-    background: #142310;
+    background: #253010;
+  }
+  /* Top fade -- mirrors competitions-section's new bottom fade so the
+     competitions-to-pathway handoff blends instead of cutting hard. */
+  .pathway-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 300px;
+    background: linear-gradient(
+      to bottom,
+      #252813 0%,
+      rgba(37, 40, 19, 0.65) 35%,
+      rgba(37, 40, 19, 0.25) 65%,
+      transparent 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+  /* Bottom fade -- eases into the footer's own solid background
+     color (#141d0c, matching its vector illustration's near-treeline
+     fill) so pathway blends straight into the footer instead of
+     cutting hard at the section boundary. */
+  .pathway-section::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 300px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(20, 29, 12, 0.25) 35%,
+      rgba(20, 29, 12, 0.65) 65%,
+      #141d0c 100%
+    );
+    z-index: 1;
+    pointer-events: none;
   }
   .pathway-sign {
     position: relative;
@@ -764,67 +1097,189 @@
   }
 
   /* ============================================================
-     FOOTER (ported from style.css, self-contained -- boxicons
-     swapped for small inline SVGs so no icon font is needed)
+     FOOTER -- same elements as before (rusa loop video, Sylvara
+     mark, socials, contact, copyright), but restructured into the
+     flat-vector-illustration-band + clean-grid layout style
+     (logo lockup / nav columns / pill CTA, divider, copyright +
+     socials) requested as a reference, kept in the site's own dark
+     green + gold palette and its own deer/Sylvara branding rather
+     than the reference's colors.
      ============================================================ */
   #footer {
-    background: #456825;
-    padding: 50px 24px 30px;
-    color: #fff;
+    position: relative;
+    /* Solid, matching the vector illustration's own near-treeline
+       fill (#141d0c) exactly, so the content area below the
+       illustration reads as the same ground it's standing on
+       instead of jumping to a different, unrelated shade. */
+    background: #141d0c;
+    color: rgba(255, 255, 255, 0.85);
     font-size: 14px;
-    box-shadow: 0 -40px 50px -20px rgba(0, 0, 0, 0.5);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow: hidden;
   }
-  .footer-content {
+  /* Flat-vector landscape band -- layered ridge/treeline shapes, a
+     soft gold sun, a couple of birds, and a winding path. Sits
+     directly on the pathway fade's end color so it reads as a
+     continuation, not a new block. Taller again per request --
+     fine for this footer to run bigger than a "standard" footer. */
+  .footer-vector-band {
+    width: 100%;
+    height: clamp(240px, 32vw, 400px);
+    line-height: 0;
+    overflow: hidden;
+  }
+  .footer-vector-band svg { display: block; width: 100%; height: 100%; }
+  .footer-star {
+    fill: #FCE7B3;
+    opacity: 0.15;
+    animation-name: footer-star-twinkle;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    transform-origin: center;
+  }
+  @keyframes footer-star-twinkle {
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: var(--star-op, 0.8); }
+  }
+  .footer-main {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 40px;
+    gap: 32px;
     flex-wrap: wrap;
-    max-width: 1200px;
+    max-width: 1180px;
     margin: 0 auto;
+    padding: 6px 24px 40px;
   }
-  .footer-left { flex: 0 0 auto; }
-  .footer-favicon { width: 170px; height: auto; }
-  .footer-center { flex: 1; text-align: center; min-width: 200px; }
-  .footer-center-logo { max-width: 595px; width: 100%; height: auto; }
-  .footer-right { flex: 0 0 auto; text-align: right; }
-  .social-media-icons { margin-bottom: 15px; }
-  .social-media-icons a {
-    color: #fff;
-    margin-left: 12px;
-    transition: opacity 0.3s;
-    display: inline-flex;
-    vertical-align: middle;
+  .footer-brand { display: flex; align-items: center; gap: 18px; flex: 1; }
+  /* Kept as the full uncropped video (not shrunk into a little
+     circular icon) -- just given the same warm glow treatment as
+     the rest of the site's key art. Sized up so it reads as a real
+     piece of key art in the row, not a small aside. */
+  .footer-favicon {
+    width: 150px;
+    height: auto;
+    border-radius: 14px;
+    filter:
+      drop-shadow(0 6px 16px rgba(0, 0, 0, 0.55))
+      drop-shadow(0 0 22px rgba(252, 221, 139, 0.4))
+      drop-shadow(0 0 40px rgba(120, 200, 120, 0.2));
   }
-  .social-media-icons a:hover { opacity: 0.7; }
-  .social-media-icons svg { width: 22px; height: 22px; fill: currentColor; }
-  .footer-contact { margin-top: 10px; }
-  .footer-contact p { margin: 0; font-weight: 500; line-height: 1.6; }
-  .contact-name { font-weight: 700; font-size: 15px; }
-  .contact-whatsapp a {
-    color: #fff;
+  /* Moved out to its own centered slot between the deer and the
+     nav links, sized up to be the visual anchor of the row. */
+  .footer-brand-logo {
+    flex: 0 0 auto;
+    max-width: 360px;
+    width: 100%;
+    height: auto;
+    filter:
+      drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6))
+      drop-shadow(0 0 20px rgba(239, 157, 109, 0.45));
+  }
+  .footer-nav-cols {
+    display: flex;
+    gap: 48px;
+    flex: 1;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .footer-nav-cols ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+  .footer-nav-cols a {
+    color: rgba(255, 255, 255, 0.68);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.25s ease;
+  }
+  .footer-nav-cols a:hover { color: #FCDD8B; }
+  .footer-divider {
+    height: 1px;
+    max-width: 1180px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  /* Bottom row is now a single centered stack -- copyright, contact,
+     then socials -- instead of a left/right split. */
+  .footer-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 26px 24px 30px;
+    text-align: center;
+  }
+  .copyright {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  .copyright strong { color: rgba(255, 255, 255, 0.65); font-weight: 600; }
+  .footer-contact {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .contact-name {
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .contact-dot { color: rgba(255, 255, 255, 0.3); }
+  .contact-whatsapp {
+    color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 14px;
+    gap: 6px;
+    font-weight: 500;
+    font-size: 13px;
+    transition: color 0.25s ease;
   }
-  .contact-whatsapp a:hover { text-decoration: underline; }
-  .copyright {
-    border-top: 1px solid rgba(255,255,255,0.3);
-    text-align: center;
-    padding-top: 30px;
-    margin-top: 40px;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
+  .contact-whatsapp svg { width: 14px; height: 14px; fill: currentColor; }
+  .contact-whatsapp:hover { color: #FCDD8B; }
+  .social-media-icons { display: flex; gap: 10px; margin: 0; }
+  .social-media-icons a {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.75);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease, transform 0.25s ease;
   }
-  @media (max-width: 768px) {
-    .footer-content { flex-direction: column; text-align: center; gap: 25px; }
-    .footer-right { text-align: center; }
-    .social-media-icons a { margin: 0 8px; }
-    .footer-favicon { width: 80px; height: 80px; }
-    .footer-center-logo { max-width: 250px; }
+  .social-media-icons a:hover {
+    border-color: #FCDD8B;
+    color: #FCDD8B;
+    background: rgba(252, 221, 139, 0.08);
+    transform: translateY(-2px);
+  }
+  .social-media-icons svg { width: 16px; height: 16px; fill: currentColor; }
+  @media (max-width: 900px) {
+    .footer-main { justify-content: center; text-align: center; }
+    .footer-nav-cols { justify-content: center; width: 100%; }
+  }
+  @media (max-width: 640px) {
+    .footer-main { flex-direction: column; gap: 24px; padding-top: 10px; }
+    .footer-nav-cols { gap: 32px; }
+    .footer-favicon { width: 110px; }
+    .footer-brand-logo { max-width: 170px; }
   }
 
   /* ============================================================
@@ -912,14 +1367,14 @@
 <section class="forest-hero-trigger" id="hero">
   <div class="forest-stage" id="forestStage">
 
-    <img src="assets/img/FOREST/Background.jpeg" class="forest-layer forest-bg" alt="" loading="eager">
+    <img src="assets/img/forest_path_faded.png?v=4" class="forest-layer forest-bg" alt="" loading="eager">
 
-    <img src="assets/img/FOREST/Pond.webp" class="forest-layer forest-pond" id="forestPond" alt="" loading="eager">
+    <img src="assets/img/HeroPageAnimation.webp" class="forest-layer forest-pond" id="forestPond" alt="" loading="eager">
 
     <div class="forest-trees" id="forestTrees"></div>
 
-    <img src="assets/img/FOREST/left.webp" class="forest-layer forest-near forest-near-left" id="forestNearLeft" alt="" loading="eager">
-    <img src="assets/img/FOREST/right.webp" class="forest-layer forest-near forest-near-right" id="forestNearRight" alt="" loading="eager">
+    <img src="assets/img/left.webp" class="forest-layer forest-near forest-near-left" id="forestNearLeft" alt="" loading="eager">
+    <img src="assets/img/right.webp" class="forest-layer forest-near forest-near-right" id="forestNearRight" alt="" loading="eager">
 
     <div class="forest-logo" id="forestLogo">
       <img src="assets/img/Sylvara.webp" alt="Sylvara">
@@ -980,11 +1435,11 @@
   <div class="rock-detail-overlay" id="rockOverlay">
     <div class="rock-detail-card">
       <button class="rock-detail-close" id="rockClose" aria-label="Close">&times;</button>
-      <h3 class="rock-detail-title" id="rockDetailTitle"></h3>
-      <div class="rock-detail-body" id="rockDetailBody">
-        <img class="rock-detail-photo" id="rockDetailPhoto" alt="">
-        <p class="rock-detail-desc" id="rockDetailDesc"></p>
+      <div class="rock-detail-header">
+        <img class="rock-detail-badge" id="rockDetailPhoto" alt="">
+        <h3 class="rock-detail-title" id="rockDetailTitle"></h3>
       </div>
+      <div class="comp-detail-extra" id="rockDetailExtra"></div>
     </div>
   </div>
 
@@ -1011,41 +1466,101 @@
 </main>
 
 <footer id="footer">
-  <div class="footer-content">
-    <div class="footer-left">
+  <div class="footer-vector-band" aria-hidden="true">
+    <svg viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="footerSunGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#FCDD8B" stop-opacity="0.55"/>
+          <stop offset="60%" stop-color="#FCDD8B" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#FCDD8B" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- Twinkling stars -- each one animates its own opacity via
+           the shared .footer-star keyframe, staggered per-star with
+           inline --star-op/animation-duration/animation-delay so
+           they don't all pulse in sync. -->
+      <g class="footer-stars">
+        <circle class="footer-star" cx="636.6" cy="11.6" r="1.6" style="--star-op:0.77; animation-duration:3.67s; animation-delay:0.89s;"/>
+        <circle class="footer-star" cx="884.3" cy="20.3" r="1.8" style="--star-op:0.7; animation-duration:2.64s; animation-delay:0.12s;"/>
+        <circle class="footer-star" cx="36.0" cy="36.2" r="2.1" style="--star-op:0.74; animation-duration:2.64s; animation-delay:2.18s;"/>
+        <circle class="footer-star" cx="803.2" cy="8.9" r="2.3" style="--star-op:0.56; animation-duration:2.88s; animation-delay:2.79s;"/>
+        <circle class="footer-star" cx="948.1" cy="55.8" r="1.3" style="--star-op:0.74; animation-duration:3.89s; animation-delay:0.39s;"/>
+        <circle class="footer-star" cx="801.0" cy="111.6" r="2.0" style="--star-op:0.72; animation-duration:2.96s; animation-delay:3.89s;"/>
+        <circle class="footer-star" cx="822.8" cy="95.8" r="2.4" style="--star-op:0.52; animation-duration:3.61s; animation-delay:2.31s;"/>
+        <circle class="footer-star" cx="233.3" cy="49.1" r="1.3" style="--star-op:0.61; animation-duration:2.4s; animation-delay:0.93s;"/>
+        <circle class="footer-star" cx="633.0" cy="59.8" r="1.7" style="--star-op:0.87; animation-duration:2.73s; animation-delay:0.84s;"/>
+        <circle class="footer-star" cx="645.1" cy="94.5" r="1.4" style="--star-op:0.65; animation-duration:2.53s; animation-delay:2.92s;"/>
+        <circle class="footer-star" cx="979.7" cy="98.9" r="2.0" style="--star-op:0.81; animation-duration:3.89s; animation-delay:2.74s;"/>
+        <circle class="footer-star" cx="234.5" cy="12.6" r="1.6" style="--star-op:0.88; animation-duration:2.62s; animation-delay:1.07s;"/>
+        <circle class="footer-star" cx="868.8" cy="52.7" r="2.1" style="--star-op:0.68; animation-duration:4.03s; animation-delay:1.58s;"/>
+        <circle class="footer-star" cx="269.6" cy="43.0" r="2.0" style="--star-op:0.86; animation-duration:3.37s; animation-delay:1.05s;"/>
+        <circle class="footer-star" cx="401.4" cy="39.1" r="2.6" style="--star-op:0.52; animation-duration:2.38s; animation-delay:2.04s;"/>
+        <circle class="footer-star" cx="117.5" cy="97.1" r="2.3" style="--star-op:0.65; animation-duration:2.33s; animation-delay:1.69s;"/>
+      </g>
+      <!-- Sun + glow pulled down and shrunk so the glow's radius
+           stays inside the viewBox (cy - r >= 0) -- at the old
+           cy=70/r=120 the top of the glow fell above y=0 and got
+           hard-clipped by the svg's own bounds, reading as a flat
+           cut-off edge once the band got taller. Also dimmed per
+           request. -->
+      <circle cx="500" cy="95" r="85" fill="url(#footerSunGrad)"/>
+      <circle cx="500" cy="95" r="30" fill="#FCE7B3" opacity="0.7"/>
+      <path d="M360,50 q6,-8 12,0 q6,-8 12,0" stroke="#FCDD8B" stroke-width="2" fill="none" opacity="0.7" stroke-linecap="round"/>
+      <path d="M600,40 q5,-7 10,0 q5,-7 10,0" stroke="#FCDD8B" stroke-width="2" fill="none" opacity="0.6" stroke-linecap="round"/>
+      <path d="M660,58 q4,-6 8,0 q4,-6 8,0" stroke="#FCDD8B" stroke-width="1.6" fill="none" opacity="0.5" stroke-linecap="round"/>
+      <path d="M0,220 L0.0,124.7 L71.4,116.4 L142.9,126.1 L214.3,142.7 L285.7,145.0 L357.1,139.5 L428.6,125.8 L500.0,116.5 L571.4,126.0 L642.9,137.5 L714.3,139.6 L785.7,144.8 L857.1,132.7 L928.6,128.7 L1000.0,119.6 L1000,220 Z" fill="#39461f" opacity="0.55"/>
+      <path d="M0,220 L-20,175 L24.2,130.0 L68.5,175 L97.0,147.3 L125.4,175 L167.6,134.3 L209.7,175 L248.9,142.8 L288.1,175 L326.2,136.9 L364.3,175 L402.0,145.8 L439.7,175 L474.7,141.1 L509.7,175 L549.9,129.1 L590.1,175 L634.2,138.1 L678.3,175 L713.6,143.6 L748.9,175 L777.0,148.5 L805.1,175 L840.7,142.6 L876.4,175 L910.5,131.2 L944.7,175 L981.4,137.8 L1018.1,175 L1049.7,148.5 L1081.3,175 L1000,220 Z" fill="#212c11" opacity="0.8"/>
+      <path d="M0,198 C150,186 250,208 400,193 C550,178 650,200 800,188 C880,182 950,190 1000,185 L1000,204 C950,210 880,201 800,208 C650,222 550,198 400,213 C250,229 150,204 0,214 Z" fill="#E7C98A" opacity="0.22"/>
+      <path d="M0,220 L-20,216 L30.6,134.8 L81.1,216 L136.0,126.4 L190.9,216 L244.4,127.3 L297.9,216 L333.6,146.4 L369.3,216 L427.9,138.7 L486.5,216 L544.0,161.2 L601.6,216 L648.3,155.6 L695.0,216 L743.6,141.9 L792.2,216 L827.5,156.9 L862.9,216 L904.8,127.5 L946.8,216 L1001.0,159.3 L1055.1,216 L1000,220 Z" fill="#141d0c"/>
+    </svg>
+  </div>
+
+  <div class="footer-main">
+    <div class="footer-brand">
       <video src="assets/img/rusa-loop.webm" class="footer-favicon" autoplay loop muted playsinline></video>
     </div>
-    <div class="footer-center">
-      <img src="assets/img/Sylvara.webp" class="footer-center-logo" alt="">
-    </div>
-    <div class="footer-right">
-      <div class="social-media-icons">
-        <a href="https://www.instagram.com/fortelations/?hl=en" target="_blank" aria-label="Instagram">
-          <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.25.07 1.63.07 4.81s-.01 3.56-.07 4.81c-.15 3.23-1.66 4.77-4.92 4.92-1.25.06-1.63.07-4.85.07s-3.6-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.25-.07-1.63-.07-4.81s.01-3.56.07-4.81C2.38 3.96 3.9 2.42 7.15 2.27 8.4 2.21 8.78 2.2 12 2.2zm0 1.8c-3.17 0-3.55.01-4.8.07-2.32.11-3.35 1.16-3.46 3.46-.06 1.25-.07 1.63-.07 4.47s.01 3.22.07 4.47c.11 2.3 1.14 3.35 3.46 3.46 1.25.06 1.63.07 4.8.07s3.55-.01 4.8-.07c2.32-.11 3.35-1.16 3.46-3.46.06-1.25.07-1.63.07-4.47s-.01-3.22-.07-4.47c-.11-2.3-1.14-3.35-3.46-3.46-1.25-.06-1.63-.07-4.8-.07zm0 3.4a5.4 5.4 0 1 1 0 10.8 5.4 5.4 0 0 1 0-10.8zm0 1.8a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2zm5.6-2.1a1.26 1.26 0 1 1 0 2.52 1.26 1.26 0 0 1 0-2.52z"/></svg>
-        </a>
-        <a href="https://www.tiktok.com/@fortelations" target="_blank" aria-label="TikTok">
-          <svg viewBox="0 0 24 24"><path d="M16.6 2h-3.2v13.1a2.9 2.9 0 1 1-2.05-2.77V9.05a6.1 6.1 0 1 0 5.25 6.05V8.36a7.6 7.6 0 0 0 4.4 1.4V6.55a4.4 4.4 0 0 1-4.4-4.4z"/></svg>
-        </a>
-        <a href="https://www.youtube.com/@smak7penabur" target="_blank" aria-label="YouTube">
-          <svg viewBox="0 0 24 24"><path d="M23.5 6.5a3 3 0 0 0-2.1-2.1C19.5 4 12 4 12 4s-7.5 0-9.4.4A3 3 0 0 0 .5 6.5 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.5 3 3 0 0 0 2.1 2.1C4.5 20 12 20 12 20s7.5 0 9.4-.4a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.5zM9.6 15.5v-7l6.2 3.5z"/></svg>
-        </a>
-        <a href="mailto:aksenfortelations@gmail.com" aria-label="Email">
-          <svg viewBox="0 0 24 24"><path d="M2 5.5A1.5 1.5 0 0 1 3.5 4h17A1.5 1.5 0 0 1 22 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 18.5v-13zm2.1.5 7.9 6.2L19.9 6H4.1zM20 8.1l-7.4 5.8a1 1 0 0 1-1.2 0L4 8.1V18h16V8.1z"/></svg>
-        </a>
-      </div>
-      <div class="footer-contact">
-        <p class="contact-name">Nathanael Edgar</p>
-        <p class="contact-whatsapp">
-          <a href="https://wa.me/628125000318">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5C11 9.3 10.5 8 10.3 7.5c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.1 3c.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2 0-.1-.2-.2-.5-.3zM12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
-            +62 812-5000-318
-          </a>
-        </p>
-      </div>
-    </div>
+
+    <img src="assets/img/Sylvara.webp" class="footer-brand-logo" alt="Fortelations '26 Sylvara">
+
+    <nav class="footer-nav-cols" aria-label="Footer">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#competitions">Competitions</a></li>
+      </ul>
+      <ul>
+        <li><a href="about.html">About</a></li>
+        <li><a href="calendar.html">Calendar</a></li>
+      </ul>
+    </nav>
   </div>
-  <div class="copyright">
-    &copy; Copyright <strong><span>Fortelation</span></strong> 2026. All Rights Reserved
+
+  <div class="footer-divider"></div>
+
+  <div class="footer-bottom">
+    <p class="copyright">&copy; Copyright <strong>Fortelation</strong> 2026. All Rights Reserved</p>
+    <p class="footer-contact">
+      <span class="contact-name">Nathanael Edgar</span>
+      <span class="contact-dot">&middot;</span>
+      <a href="https://wa.me/628125000318" class="contact-whatsapp">
+        <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5C11 9.3 10.5 8 10.3 7.5c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.1 3c.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2 0-.1-.2-.2-.5-.3zM12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
+        +62 812-5000-318
+      </a>
+    </p>
+
+    <div class="social-media-icons">
+      <a href="https://www.instagram.com/fortelations/?hl=en" target="_blank" aria-label="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.25.07 1.63.07 4.81s-.01 3.56-.07 4.81c-.15 3.23-1.66 4.77-4.92 4.92-1.25.06-1.63.07-4.85.07s-3.6-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.25-.07-1.63-.07-4.81s.01-3.56.07-4.81C2.38 3.96 3.9 2.42 7.15 2.27 8.4 2.21 8.78 2.2 12 2.2zm0 1.8c-3.17 0-3.55.01-4.8.07-2.32.11-3.35 1.16-3.46 3.46-.06 1.25-.07 1.63-.07 4.47s.01 3.22.07 4.47c.11 2.3 1.14 3.35 3.46 3.46 1.25.06 1.63.07 4.8.07s3.55-.01 4.8-.07c2.32-.11 3.35-1.16 3.46-3.46.06-1.25.07-1.63.07-4.47s-.01-3.22-.07-4.47c-.11-2.3-1.14-3.35-3.46-3.46-1.25-.06-1.63-.07-4.8-.07zm0 3.4a5.4 5.4 0 1 1 0 10.8 5.4 5.4 0 0 1 0-10.8zm0 1.8a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2zm5.6-2.1a1.26 1.26 0 1 1 0 2.52 1.26 1.26 0 0 1 0-2.52z"/></svg>
+      </a>
+      <a href="https://www.tiktok.com/@fortelations" target="_blank" aria-label="TikTok">
+        <svg viewBox="0 0 24 24"><path d="M16.6 2h-3.2v13.1a2.9 2.9 0 1 1-2.05-2.77V9.05a6.1 6.1 0 1 0 5.25 6.05V8.36a7.6 7.6 0 0 0 4.4 1.4V6.55a4.4 4.4 0 0 1-4.4-4.4z"/></svg>
+      </a>
+      <a href="https://www.youtube.com/@smak7penabur" target="_blank" aria-label="YouTube">
+        <svg viewBox="0 0 24 24"><path d="M23.5 6.5a3 3 0 0 0-2.1-2.1C19.5 4 12 4 12 4s-7.5 0-9.4.4A3 3 0 0 0 .5 6.5 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.5 3 3 0 0 0 2.1 2.1C4.5 20 12 20 12 20s7.5 0 9.4-.4a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.5zM9.6 15.5v-7l6.2 3.5z"/></svg>
+      </a>
+      <a href="mailto:aksenfortelations@gmail.com" aria-label="Email">
+        <svg viewBox="0 0 24 24"><path d="M2 5.5A1.5 1.5 0 0 1 3.5 4h17A1.5 1.5 0 0 1 22 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 18.5v-13zm2.1.5 7.9 6.2L19.9 6H4.1zM20 8.1l-7.4 5.8a1 1 0 0 1-1.2 0L4 8.1V18h16V8.1z"/></svg>
+      </a>
+    </div>
   </div>
 </footer>
 
@@ -1118,16 +1633,20 @@
       // Crowd, smaller/"behind" pair -- appended before the front
       // pair so they paint behind (same z-index within this tier,
       // so array/DOM order controls stacking). Pulled further out
-      // toward each side instead of clustering dead-center.
-      { className: 'forest-tree-farmid', img: 'TreeThree_Mid.png', left: 30, bottom: -4, height: 75 },
-      { className: 'forest-tree-farmid', img: 'TreeThree_Mid.png', left: 70, bottom: -4, height: 75 },
+      // toward each side instead of clustering dead-center. Bottom
+      // raised well above their old -4 (>20 points up) and given
+      // slightly different values per tree so the row doesn't sit
+      // perfectly level.
+      { className: 'forest-tree-farmid', img: 'TreeThree_Mid.png', left: 30, bottom: 7, height: 75 },
+      { className: 'forest-tree-farmid', img: 'TreeThree_Mid.png', left: 70, bottom: 10, height: 75 },
 
       // Crowd, taller/"front" pair -- painted on top of the pair
       // above, noticeably taller now (95 vs 55) so the front/behind
       // depth difference actually reads. Also spaced out left/right
-      // instead of sitting dead-center.
-      { className: 'forest-tree-farmid', img: 'TreeThree_Mid.png', left: 40, bottom: -6, height: 95 },
-      { className: 'forest-tree-farmid', img: 'TreeThree_Mid.png', left: 60, bottom: -6, height: 95 },
+      // instead of sitting dead-center. Same >20-point raise + slight
+      // per-tree variation as the pair above.
+      { className: 'forest-tree-farmid', img: 'TreeThree_Mid.png', left: 40, bottom: 6, height: 95 },
+      { className: 'forest-tree-farmid', img: 'TreeThree_Mid.png', left: 60, bottom: 9, height: 95 },
     ];
 
     TREES.forEach((t) => {
@@ -1166,10 +1685,12 @@
     // (TreeLeft/TreeRight stay the dominant top layer), positioned
     // toward the outer edges so they don't cover the countdown
     // boxes in the middle.
+    // Same >20-point raise as the farmid crowd above, each nudged by
+    // a slightly different amount so they don't all land dead level.
     const EXTRA_BACKDROP_TREES = [
-      { img: 'TreeOne_Mid.png',  left: -2,  bottom: -10, height: 100 },
-      { img: 'TreeFour_Mid.png', left: 102, bottom: -10, height: 100 },
-      { img: 'TreeTwo_Mid.png',  left: 14,  bottom: -12, height: 85 },
+      { img: 'TreeOne_Mid.png',  left: -2,  bottom: 2, height: 100 },
+      { img: 'TreeFour_Mid.png', left: 102, bottom: 5, height: 100 },
+      { img: 'TreeTwo_Mid.png',  left: 14,  bottom: 0, height: 85 },
     ];
     EXTRA_BACKDROP_TREES.forEach((t) => {
       const el = document.createElement('img');
@@ -1217,12 +1738,9 @@
     tl.fromTo('#forestLogo', { opacity: 1, scale: 1, y: 0 }, { opacity: 0, scale: 0.55, y: -40, duration: 1.6, ease: 'power1.in' }, 0.3);
     tl.to('.forest-bg', { scale: 1.3, duration: 4.2, ease: 'none' }, 0.2);
 
-    // Pond: a gentle zoom in step with the background (it reads as
-    // part of that same ground-level scene), then fades out on the
-    // same schedule as the near corner trees so the whole flythrough
-    // clears together instead of the pond lingering after everything
-    // else has gone.
-    tl.to('#forestPond', { scale: 1.15, duration: 4.2, ease: 'none' }, 0.2);
+    // Pond: no zoom -- just fades out on the same schedule as the
+    // near corner trees so the whole flythrough clears together
+    // instead of the pond lingering after everything else has gone.
     tl.to('#forestPond', { opacity: 0, duration: 2.0 }, 3.0);
 
     tl.fromTo('.forest-tree-farmid', { scale: 1 }, { scale: 2.2, duration: 2.6, ease: 'power1.in' }, 0.2);
@@ -1231,21 +1749,9 @@
     tl.fromTo('.forest-tree-nearmid', { scale: 1 }, { scale: 2.9, duration: 2.0, ease: 'power1.in' }, 0.4);
     tl.to('.forest-tree-nearmid', { opacity: 0, duration: 0.8, ease: 'power1.in' }, 1.4);
 
-    // TreeLeft/TreeRight grow differently on mobile vs desktop --
-    // mobile keeps the bigger scale that fixed it looking right
-    // there; desktop reverts to its original, smaller scale from
-    // before that mobile-specific change. Mobile also pushes them
-    // further out toward the edges (bigger x movement) per request.
-    const isMobileNear = window.innerWidth <= 769;
-    const nearFromScale = isMobileNear ? 1.3 : 0.9;
-    const nearToScale = isMobileNear ? 3.0 : 2.4;
-    const nearFromX = isMobileNear ? 14 : 4;
-    const nearToX = isMobileNear ? 34 : 14;
-
-    tl.fromTo('#forestNearLeft', { scale: nearFromScale, x: `-${nearFromX}%` }, { scale: nearToScale, x: `-${nearToX}%`, duration: 2.4, ease: 'power1.in' }, 0.5);
+    // left.webp/right.webp: no zoom/drift -- just a plain scroll-tied
+    // fade out, same as the pond above.
     tl.to('#forestNearLeft', { opacity: 0, duration: 2.0 }, 3.0);
-
-    tl.fromTo('#forestNearRight', { scale: nearFromScale, x: `${nearFromX}%` }, { scale: nearToScale, x: `${nearToX}%`, duration: 2.4, ease: 'power1.in' }, 0.8);
     tl.to('#forestNearRight', { opacity: 0, duration: 2.0 }, 3.3);
 
     // Backdrop trees crossfade in right as the flythrough trees
@@ -1327,7 +1833,7 @@
   const COMPETITIONS = [
     { file: "Band",           label: "Band",                desc: "Bands bring full-stage energy, battling it out for the loudest cheer in the house.",            top: 3.3,  left: 26.3, z: 3, photo: "band" },
     { file: "VocalGroup",     label: "Vocal Group",         desc: "Harmonies collide as vocal ensembles take the stage together.",                                 top: 7.6,  left: 66.2, z: 2, photo: "vocalgroup" },
-    { file: "SoloSinging",    label: "Solo Singing",        desc: "One voice, one stage — solo singers go all in for the spotlight.",                              top: 13.9, left: 32.8, z: 4 },
+    { file: "SoloSinging",    label: "Solo Singing",        desc: "One voice, one stage — solo singers go all in for the spotlight.",                              top: 13.9, left: 32.8, z: 4, photo: "solosingin" },
     { file: "Monolog",        label: "Monolog",             desc: "A single performer, a single story, told with everything they've got.",                          top: 19.4, left: 64.9, z: 1, photo: "Monolog" },
     { file: "MembacaPuisi",   label: "Membaca Puisi",       desc: "Poetry reading competition celebrating rhythm, emotion, and delivery.",                          top: 23.5, left: 26.3, z: 2, photo: "Puisi" },
     { file: "EnglishSpeech",  label: "English Speech",      desc: "Speakers take the floor to persuade, inform, and inspire in English.",                           top: 28.2, left: 69.1, z: 3, photo: "English Speech" },
@@ -1338,13 +1844,504 @@
     { file: "Basket",         label: "Basketball",          desc: "Fast breaks, full courts, and the chase for the winning basket.",                                top: 55.4, left: 33.0, z: 2, photo: "Basket" },
     { file: "Futsal",         label: "Futsal",              desc: "Five-a-side football at full speed in a tighter, faster arena.",                                 top: 59.4, left: 65.6, z: 2, photo: "Futsal" },
     { file: "Floorball",      label: "Floorball",           desc: "Fast sticks and faster feet — floorball brings the floor to life.",                              top: 66.1, left: 29.4, z: 3, photo: "Floorball" },
-    { file: "Bulutangkis",    label: "Bulutangkis",         desc: "Badminton rallies test reflex, footwork, and nerve.",                                            top: 69.2, left: 65.0, z: 1 },
+    { file: "Bulutangkis",    label: "Bulutangkis",         desc: "Badminton rallies test reflex, footwork, and nerve.",                                            top: 69.2, left: 65.0, z: 1, photo: "Bulutangkis" },
     { file: "Photography",   label: "Photography",         desc: "Capturing the moment, one frame at a time.",                                                    top: 76.2, left: 32.0, z: 4, photo: "Photography" },
     { file: "Drawing",        label: "Drawing",             desc: "Traditional drawing competition showcasing raw artistic skill.",                                 top: 81.2, left: 71.3, z: 2, photo: "Drawing" },
     { file: "DigitalDrawing", label: "Digital Drawing",     desc: "Tablets and styluses replace pencils in this digital art showdown.",                             top: 85.8, left: 35.7, z: 2, photo: "Digital Drawing" },
     { file: "MonSoonSim",     label: "MonSoonSim",          desc: "A business simulation competition testing strategy under pressure.",                            top: 90.5, left: 69.5, z: 1, photo: "Moonsoonsim" },
     { file: "CCA",            label: "CCA",                 desc: "Cross-category showcase honoring Sylvara's extracurricular spirit.",                            top: 96.8, left: 32.2, z: 2, photo: "CCA" },
   ];
+
+  // ---------- Competitions: condensed spec sheets ----------
+  // Keyed by each COMPETITIONS entry's `file` value. Every entry
+  // mirrors the short "spec card" reference the client provided
+  // (peserta / format / waktu / biaya, hadiah, ketentuan singkat,
+  // contact) -- trimmed to the essentials, icons swapped for the
+  // site's own gold-on-forest palette instead of the reference's
+  // purple/dark theme. A stone with no matching key here (there
+  // currently are none) just renders the old photo+desc only.
+  const COMPETITION_DETAILS = {
+    Band: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Tim band, maks. 8 anggota/tim &middot; kuota 5&ndash;10 tim' },
+        { icon: '🎸', label: 'Format', value: '2 lagu (1 wajib + 1 pilihan bebas), tampil bergilir di hadapan juri' },
+        { icon: '📅', label: 'Waktu Perlombaan', value: 'Kamis, 17 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp250.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp1.250.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp1.000.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp750.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Waktu tampil: 5 menit persiapan alat + 7 menit penampilan (2 lagu bergilir).',
+        'Lagu wajib pilih 1 dari 5 pilihan panitia; lagu pilihan bebas berbahasa Inggris, tidak boleh genre hardcore/metal/underground & tidak menyinggung SARA.',
+        'Wajib mengisi nama asli anggota sesuai KTP/Kartu Pelajar & menyerahkan scan/foto identitas seluruh anggota (boleh 1 PDF per grup).',
+        'Wajib mengirim 1&ndash;2 perwakilan tiap grup untuk mengikuti Technical Meeting.',
+        'Kartu nomor peserta (disediakan panitia) dikenakan saat tampil.',
+      ],
+      contacts: [{ name: 'Brandon Oroh', wa: '087878161009', ig: '@brandonezkl' }],
+    },
+    Basket: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Tim putra & putri (kategori terpisah) &middot; kuota min. 8 putra & 6 putri' },
+        { icon: '🏀', label: 'Format', value: 'Sistem pool &rarr; sistem gugur, peraturan resmi PERBASI' },
+        { icon: '📅', label: 'Waktu Pertandingan', value: 'Rabu, 9 Sept &ndash; Jumat, 18 Sept 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Putra Rp400.000 &middot; Putri Rp350.000 + jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [
+        { label: 'Tim Putra', rows: [
+          { label: 'Juara 1', value: 'Rp2.000.000 + Sertifikat + Piala' },
+          { label: 'Juara 2', value: 'Rp1.500.000 + Sertifikat + Piala' },
+          { label: 'Juara 3', value: 'Rp1.000.000 + Sertifikat + Piala' },
+        ]},
+        { label: 'Tim Putri', rows: [
+          { label: 'Juara 1', value: 'Rp1.500.000 + Sertifikat + Piala' },
+          { label: 'Juara 2', value: 'Rp1.000.000 + Sertifikat + Piala' },
+          { label: 'Juara 3', value: 'Rp750.000 + Sertifikat + Piala' },
+        ]},
+      ],
+      ketentuan: [
+        'Mengikuti peraturan resmi PERBASI (wasit & teknis); 4&times;10 menit per kuarter, 2 menit terakhir kuarter ke-4 pakai waktu bersih.',
+        'Tim wajib membawa 2 seragam (gelap & terang); tim yang disebut lebih dulu memakai seragam terang.',
+        'Menang = nilai 2, kalah = nilai 1, kalah WO = nilai 0. Membawa senjata, rokok, minuman keras, atau narkoba berakibat diskualifikasi & blacklist.',
+        'Tim yang dinyatakan WO dikenakan denda Rp50.000 (uang jaminan); WO dua kali wajib membayar ulang.',
+        'Tim wajib hadir & registrasi 1 jam sebelum jadwal; official/pelatih wajib bersepatu, bercelana panjang, dan berkaos berkerah.',
+      ],
+      contacts: [{ name: 'Audrey Chantrea Palangan', wa: '085925306495', ig: '@audr.eyycp' }],
+    },
+    Bulutangkis: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Ganda, bukan atlet klub/daerah/nasional &middot; kuota 10&ndash;20 tim, maks. 2 tim/sekolah per nomor' },
+        { icon: '🏸', label: 'Format', value: 'Sistem gugur, rally point 21; semifinal & final best-of-3 set' },
+        { icon: '📅', label: 'Waktu Pertandingan', value: 'Senin, 14 Sept &ndash; Rabu, 16 Sept 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Putra/Putri/Campuran masing-masing Rp300.000 + jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ label: 'Berlaku tiap kategori — Ganda Putra, Ganda Putri, Ganda Campuran', rows: [
+        { label: 'Juara 1', value: 'Rp1.000.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp750.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp500.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Peserta wajib membawa raket sendiri, mengenakan jersey & sepatu bulu tangkis, dan didampingi pelatih/pendamping.',
+        'Tim wajib hadir & warming up 15 menit sebelum bertanding; tidak hadir setelah 3 kali panggilan (tiap 3 menit) = kalah WO.',
+        'Sistem gugur; rally point 21 untuk game reguler, sedangkan semifinal & final memakai best-of-3 set.',
+        'Tidak ada pergantian/rangkap pemain per nomor; pemain cedera saat bertanding tidak diberi waktu pemulihan.',
+        'Shuttlecock disediakan panitia, maksimal 3 per pertandingan; tambahan dikenakan Rp6.000/pc.',
+      ],
+      contacts: [{ name: 'Sweetly Elgift Kristiadi', wa: '085780606619', ig: '@elgiftkr' }],
+    },
+    Chess: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Individu, lawan ditentukan sistem Swiss Manager' },
+        { icon: '♟️', label: 'Format', value: 'Sistem swiss, waktu berpikir 15 menit/peserta' },
+        { icon: '📅', label: 'Hari & Tanggal', value: 'Senin, 14 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp100.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp1.000.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp700.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp400.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Wajib membawa peralatan catur standar FIDE & jam catur digital sendiri &mdash; tidak membawa dinyatakan kalah.',
+        'Bidak yang sudah dipegang harus dijalankan; langkah dinyatakan sah setelah bidak lepas dari tangan.',
+        'Rokade hanya sah bila raja dipegang lebih dulu, belum pernah bergerak, dan tidak terancam perwira lawan.',
+        'Langkah tidak sah pertama = kartu kuning (peringatan); langkah tidak sah kedua = kartu merah (kalah).',
+        'Menang lewat skakmat atau lawan kehabisan waktu berpikir. Peraturan ini bersifat umum dan dapat berubah sesuai ketentuan wasit.',
+      ],
+      contacts: [{ name: 'Christian Bonaran Simamora', wa: '081384130009', ig: '@chris.bonaran' }],
+    },
+    CCA: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'SMP/Sederajat &middot; tim 3 orang + 1 official' },
+        { icon: '📍', label: 'Wilayah', value: 'DKI Jakarta & sekitarnya' },
+        { icon: '🏆', label: 'Format Lomba', value: 'Penyisihan (Kahoot), Semi-Final, Final' },
+        { icon: '📅', label: 'Hari & Tanggal', value: 'Sabtu, 12 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp50.000 per tim' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp800.000 + Flazz + E-Certificate' },
+        { label: 'Juara 2', value: 'Rp700.000 + Flazz + E-Certificate' },
+        { label: 'Juara 3', value: 'Rp600.000 + Flazz + E-Certificate' },
+      ]}],
+      ketentuan: [
+        'Maksimal 3 tim per sekolah.',
+        'Peserta wajib hadir 1 jam sebelum lomba.',
+        'Alkitab boleh dibawa, tetapi tidak boleh dibuka selama lomba berlangsung.',
+        'Setiap tim wajib mengikuti Technical Meeting (7 September 2026).',
+      ],
+    },
+    DigitalDrawing: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Individu &middot; kuota 6&ndash;10 peserta, maks. 2 peserta per sekolah' },
+        { icon: '🎨', label: 'Format', value: 'Poster digital, ukuran A3; tema diumumkan saat TM' },
+        { icon: '⏱️', label: 'Durasi Pengerjaan', value: '90 menit, di tempat' },
+        { icon: '📅', label: 'Hari & Tanggal', value: 'Sabtu, 12 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp50.000 (biaya WO, dibayar saat Technical Meeting)' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp500.000 + Flazz + E-Certificate' },
+        { label: 'Juara 2', value: 'Rp400.000 + Flazz + E-Certificate' },
+        { label: 'Juara 3', value: 'Rp300.000 + Flazz + E-Certificate' },
+      ]}],
+      ketentuan: [
+        'Karya orisinal (visual & pesan), dikerjakan di tempat selama 90 menit memakai gawai pribadi & aplikasi desain apa pun.',
+        'Wajib mencantumkan logo BPK PENABUR & SMAK 7 PENABUR (file disediakan panitia).',
+        'Tema diumumkan saat Technical Meeting, Senin, 7 September 2026 di SMAK 7 PENABUR.',
+        'Dikumpulkan lewat Google Form, nama file "NAMA_ASAL_SEKOLAH" &mdash; telat, melanggar hak cipta, atau mengandung unsur negatif (kekerasan/diskriminasi/SARA) berakibat diskualifikasi.',
+        'Dinilai dari pesan poster, komposisi gambar, kreativitas, kerapihan & teknik, serta kemahiran menjelaskan karya.',
+      ],
+      contacts: [{ name: 'Amabel Eliora', wa: '81316100679', ig: '@amabelsee' }],
+    },
+    Drawing: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Individu &middot; kuota 10&ndash;25 peserta, maks. 2 peserta per sekolah' },
+        { icon: '🎨', label: 'Format', value: 'Gambar manual tangan, ukuran A3; tema diumumkan saat TM' },
+        { icon: '⏱️', label: 'Durasi Pengerjaan', value: '4 jam, di tempat + presentasi karya' },
+        { icon: '📅', label: 'Waktu Perlombaan', value: 'Rabu, 16 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp100.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp500.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp400.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp300.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Karya orisinal, dibuat manual tangan (bukan jiplakan/print); sketsa/konsep yang dibawa juga wajib hasil gambar sendiri.',
+        'Media gambar disediakan panitia: ukuran A3, kertas minimal 200 gsm.',
+        'Wajib mencantumkan logo PENABUR & SMAK 7 PENABUR Jakarta.',
+        'Tema diumumkan saat Technical Meeting; waktu pengerjaan 4 jam, dikumpulkan tepat waktu.',
+        'Dinilai dari konsep, teknik proses gambar, kreativitas, kerapihan & kebersihan, serta kemahiran menjelaskan karya saat presentasi ke juri.',
+      ],
+      contacts: [{ name: 'Felicia Sunny Gowinata', wa: '081290594268', ig: '@feliciagowinata' }],
+    },
+    EnglishSpeech: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Individu &middot; kuota 8&ndash;20 peserta, maks. 2 peserta per sekolah' },
+        { icon: '🎤', label: 'Format', value: 'Speech hafalan, 2,5&ndash;3 menit &mdash; tema "The Importance of Embracing Change in Life"' },
+        { icon: '📅', label: 'Waktu Pertandingan', value: 'Rabu, 16 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp150.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp700.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp500.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp300.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Peserta wajib menghafal speech &mdash; tidak boleh membaca teks saat tampil, meski teks tetap dikumpulkan ke juri untuk penilaian.',
+        'Isi speech tidak boleh mengandung unsur SARA atau diskriminasi.',
+        'Penampilan dimulai dengan memperkenalkan nama & asal sekolah.',
+        'Tidak ada penggantian peserta setelah Technical Meeting; peserta yang terlambat dinyatakan diskualifikasi.',
+        'Keputusan juri tidak dapat diganggu gugat.',
+      ],
+      contacts: [{ name: 'Elizabeth Shelma Issabel Napitupulu', wa: '082112302406', ig: '@oreohersheysss' }],
+    },
+    Floorball: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'SMA/Sederajat, tim putra & putri &middot; 10&ndash;15 pemain, 1 pelatih, 1 official, maks. 2 tim/sekolah' },
+        { icon: '🏑', label: 'Format', value: '4 pemain + 1 goalie di lapangan, peraturan resmi IFF' },
+        { icon: '📅', label: 'Waktu Pertandingan', value: 'Rabu, 9 Sept &ndash; Sabtu, 12 Sept 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Putra & Putri masing-masing Rp400.000 + jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ label: 'Berlaku tiap kategori — Putra & Putri', rows: [
+        { label: 'Juara 1', value: 'Rp1.500.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp1.000.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp750.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Mengikuti peraturan resmi IFF; keputusan wasit mutlak dan tidak dapat diganggu gugat.',
+        'Tim terdiri 10&ndash;15 pemain, 1 pelatih, 1 official; di lapangan hanya 4 pemain + 1 goalie.',
+        'Wajib mengikuti Technical Meeting; tidak ada penggantian atau penambahan pemain setelahnya.',
+        'Pemain/coach wajib hadir 30 menit sebelum pertandingan; terlambat lebih dari 5 menit dinyatakan kalah WO.',
+        'Kompetisi berjalan jika minimal 8 tim putra & 6 tim putri; pendaftaran ditutup di 12 tim per kategori.',
+      ],
+      contacts: [{ name: 'Naveena Valerion Purba', wa: '081212977210', ig: '@avevalerion' }],
+    },
+    Photography: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'SMA/Sederajat, individu &middot; kuota 10&ndash;25 peserta' },
+        { icon: '📷', label: 'Format', value: 'Foto sesuai tema, lokasi bebas &mdash; DSLR/Mirrorless/Analog/Smartphone' },
+        { icon: '📅', label: 'Waktu Perlombaan', value: 'Senin, 14 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp100.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp500.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp400.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp300.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Karya orisinal, belum pernah diikutkan lomba lain; tidak boleh mengandung unsur negatif (pornografi/SARA/narkoba).',
+        'Editing dibatasi hanya cropping, exposure, contrast, brightness, highlight, saturation & filter &mdash; tidak boleh generative AI.',
+        'Format file JPEG/JPG; dikumpulkan lewat Google Drive panitia (folder "NAMA LENGKAP_ASAL SEKOLAH"), berisi foto karya + file penjelasan (termasuk foto sebelum/sesudah diedit & rincian komposisi editing).',
+        'Tema diumumkan paling lambat saat Technical Meeting; telat mengumpulkan karya = diskualifikasi.',
+        'Keputusan juri bersifat final dan tidak dapat diganggu gugat.',
+      ],
+      contacts: [{ name: 'Henoch Raphael Zenko', wa: '082246666871', ig: '@bwepanoch' }],
+    },
+    Futsal: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Tim putra, 12 pemain (5 starter, 5&ndash;7 cadangan, 1 pelatih, 1 official) &middot; maks. 2 tim/sekolah' },
+        { icon: '⚽', label: 'Format', value: 'Sistem group + knockout round (2 tim teratas/grup lanjut)' },
+        { icon: '📅', label: 'Waktu Pertandingan', value: 'Rabu, 9 Sept &ndash; Jumat, 18 Sept 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp400.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ label: 'Tim Putra', rows: [
+        { label: 'Juara 1', value: 'Rp2.000.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp1.500.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp1.000.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Maksimal 2 tim putra per sekolah; kompetisi berjalan jika minimal 16 tim, pendaftaran ditutup di 24 tim.',
+        'Sistem group + knockout &mdash; 2 tim teratas tiap grup lanjut ke babak knockout. Undian grup dilakukan saat Technical Meeting.',
+        'Durasi pertandingan 2&times;10 menit (grup & knockout), 2&times;15 menit (final); half-time & jeda antar pertandingan 5 menit.',
+        'Tim wajib masuk ruang ganti 45 menit sebelum pertandingannya dimulai.',
+      ],
+      contacts: [{ name: 'Gabriel Marc Dialdo', wa: '08119391502', ig: '@gbrlmarccc' }],
+    },
+    MembacaPuisi: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Individu &middot; kuota 10&ndash;25 peserta, maks. 2 peserta per sekolah' },
+        { icon: '📖', label: 'Format', value: 'Baca puisi (judul ditentukan panitia), durasi 3&ndash;5 menit' },
+        { icon: '📅', label: 'Waktu Perlombaan', value: 'Selasa, 15 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp100.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp500.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp400.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp300.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Judul puisi & urutan tampil ditentukan saat Technical Meeting; teks puisi dibawa sendiri sesuai yang ditentukan panitia.',
+        'Pakaian & riasan wajah menyesuaikan tema/judul puisi; peserta wajib melepas masker saat tampil.',
+        'Tidak ada penggantian peserta setelah Technical Meeting; peserta yang terlambat dinyatakan diskualifikasi.',
+        'Keputusan juri tidak dapat diganggu gugat.',
+      ],
+      contacts: [{ name: 'Nichole Victoria Nauli Lumban Gaol', wa: '081290550025', ig: '@Nichole.vnlg' }],
+    },
+    ML: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Tim, 5 pemain utama + 1 cadangan &middot; SMA/Sederajat, maks. 16 tim' },
+        { icon: '🎮', label: 'Format', value: 'Sistem gugur: Qualifier (BO1) &rarr; Perempat & Semifinal (BO3) &rarr; Final (BO5)' },
+        { icon: '📅', label: 'Waktu Pertandingan', value: 'Jumat, Senin & Kamis &middot; 11, 14, 17 Sept 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp200.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp1.000.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp700.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp400.000 + Sertifikat + Piala' },
+        { label: 'MVP', value: 'Rp50.000 + Sertifikat' },
+      ]}],
+      ketentuan: [
+        'Tiap tim wajib memakai akun & ID ML sendiri sesuai yang didaftarkan; dilarang cheat/hack tools atau memanfaatkan BUG.',
+        'Wajib hadir 30 menit & standby online 15 menit sebelum match; device optimal + bawa kabel roll sendiri.',
+        'Gangguan device/internet pribadi jadi tanggung jawab peserta &mdash; tidak ada rematch; 1&times; pause per game (maks. 10 menit).',
+        '3 kartu kuning atau melanggar ketentuan/kecurangan dianggap gugur (WO/diskualifikasi).',
+        'Dilarang bekerja sama dengan tim lain; keputusan panitia bersifat final & mutlak.',
+      ],
+      contacts: [{ name: 'Kleinz Valentino Tjokro', wa: '087718165556', ig: '@kleinzvalentino' }],
+    },
+    MD: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Tim, 2&ndash;13 orang/tim &middot; kuota 8&ndash;15 tim, maks. 2 tim/sekolah' },
+        { icon: '🕺', label: 'Format', value: 'Modern dance, koreografi orisinal, durasi 3&ndash;5 menit' },
+        { icon: '📅', label: 'Waktu Perlombaan', value: 'Jumat, 18 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp250.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp2.000.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp1.500.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp1.000.000 + Sertifikat + Piala' },
+        { label: 'Best Costume', value: 'Sertifikat + 2 Free Tiket Closing' },
+      ]}],
+      ketentuan: [
+        'Koreografi wajib orisinal karya tim sendiri; kostum ikut dinilai juri dan harus tetap sopan.',
+        'Wajib mengirim minimal 1 perwakilan tim ke Technical Meeting (offline); tidak ada penggantian peserta setelahnya.',
+        'Musik iringan (MP3) dikumpulkan lewat Google Drive panitia, nama file "NAMA TIM_SEKOLAH", maks. 1 hari sebelum tampil.',
+        'Dinilai dari: Teknik Gerak & Power (40%), Koreografi & Orisinalitas (30%), Kreativitas (20%), Ekspresi (10%).',
+        'Terlambat datang, tidak hadir, atau belum lunas pembayaran di hari H berakibat diskualifikasi.',
+      ],
+      contacts: [{ name: 'Rachel Oksana', wa: '082123529421', ig: '@__rainchel' }],
+    },
+    Monolog: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'SMA/Sederajat, individu &middot; kuota 6&ndash;15 peserta, maks. 2/sekolah' },
+        { icon: '🎭', label: 'Format', value: 'Monolog dari naskah pilihan panitia, durasi 12&ndash;15 menit' },
+        { icon: '📅', label: 'Waktu Perlombaan', value: 'Selasa, 15 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp150.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp750.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp500.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp250.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Peserta memilih dari naskah yang disediakan panitia (naskah dapat diakses di bit.ly/4dx30Up).',
+        'Tidak ada penggantian peserta setelah Technical Meeting.',
+        'Dinilai dari 4 aspek: Karakter Peran (40%), Vokal (30%), Penafsiran Naskah (15%), Gestikulasi (15%).',
+        'Durasi penampilan 12&ndash;15 menit per peserta.',
+      ],
+      contacts: [{ name: 'Nikolaus Jeremiah Parulian Situngkir', wa: '0811986973', ig: '@nikolautjeremiahh' }],
+    },
+    MonSoonSim: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'Tim, tepat 3 peserta/tim &middot; DKI Jakarta, kuota 14&ndash;20 tim, maks. 3 tim/sekolah' },
+        { icon: '📊', label: 'Format', value: 'Simulasi bisnis, 3 babak bersistem grup; dinilai dari 10 scoring matrix' },
+        { icon: '📅', label: 'Waktu Pertandingan', value: 'Kamis, 10 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp175.000 + uang jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp1.000.000 + Sertifikat + Piala' },
+        { label: 'Juara 2', value: 'Rp750.000 + Sertifikat + Piala' },
+        { label: 'Juara 3', value: 'Rp500.000 + Sertifikat + Piala' },
+      ]}],
+      ketentuan: [
+        'Tiap tim wajib membawa laptop/tablet pribadi yang memadai (boleh bawa kabel rol sendiri).',
+        '3 babak: Penyisihan (2 grup, top 5/grup lanjut) &rarr; Semifinal (2 grup, top 3/grup lanjut) &rarr; Final menentukan Juara 1&ndash;3.',
+        'Dinilai dari 10 scoring matrix berbobot 10% masing-masing: 8 matrix tetap (Operating Expense, Revenue, Cash on Hand, Net Profit, dll.) + 2 matrix acak per babak.',
+        'Wajib kirim minimal 1 perwakilan tim ke Technical Meeting (offline); tidak ada penggantian peserta setelahnya.',
+        'Terlambat datang, tidak hadir, atau belum lunas pembayaran di hari H berakibat diskualifikasi.',
+      ],
+      contacts: [{ name: 'Reinard Evans Umboh', wa: '081919040509', ig: '@snaveier' }],
+    },
+    MUN: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'SMA/SMK/MA/Sederajat, individu (delegate) &middot; min. 8/council, maks. 50 peserta total' },
+        { icon: '🌐', label: 'Format', value: 'Pilih 1 council: UNHRC atau WHO (online); wajib submit Position Paper' },
+        { icon: '📅', label: 'Waktu Perlombaan', value: 'Kamis&ndash;Jumat, 17&ndash;18 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Delegate Rp250.000 &middot; Delegation Rp200.000 + jaminan (WO) Rp50.000' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Best Delegate', value: 'Rp850.000 + Sertifikat' },
+        { label: 'Most Outstanding Delegate', value: 'Rp700.000 + Sertifikat' },
+        { label: 'Honorable Mention', value: 'Rp450.000 + Sertifikat' },
+        { label: 'Verbal Commendation', value: 'Sertifikat' },
+        { label: 'Best Position Paper', value: 'Sertifikat' },
+      ]}],
+      ketentuan: [
+        'Position Paper wajib karya asli & belum pernah dipakai lomba lain; dikumpulkan sebagai PDF lewat Google Form dengan format subjek "PP_[Council]_[Country]".',
+        'Pilihan council: UNHRC ("The Integration of AI in Enhancing Ethical Workspaces") atau WHO Online ("The Utilization of AI in Advancing Modern Medicine"); peserta bisa dialokasikan ke council lain jika kuota penuh.',
+        'Tidak ada penggantian/penukaran peserta setelah Technical Meeting; wajib tunjukkan kartu pelajar saat registrasi ulang.',
+        'Boleh membawa device untuk Working Paper/Draft Resolution (atas izin Chair), tapi tetap disarankan membawa dokumen hardcopy.',
+        'Wajib hadir di Opening Fortelations 2026; pemenang diumumkan sebelum Closing Fortelations 2026.',
+      ],
+      contacts: [{ name: 'Bryan Amadeus Chandra', wa: '081387188802', ig: '@AksenMUN' }],
+    },
+    SoloSinging: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'SMP & SMA/Sederajat (kategori terpisah) &middot; DKI Jakarta & sekitarnya, maks. 2 peserta/sekolah per kategori' },
+        { icon: '🎤', label: 'Format', value: '2 lagu (1 wajib + 1 pilihan), bergantian &middot; maks. 10 menit per peserta' },
+      ],
+      variants: [
+        { tag: 'SMP', rows: [
+          { label: 'Kuota', value: '6&ndash;8 peserta' },
+          { label: 'Hari & Tanggal', value: 'Sabtu, 12 September 2026' },
+          { label: 'Biaya Pendaftaran', value: 'Belum ditentukan' },
+          { label: 'Lagu Wajib (pilih 1)', value: 'Because He Live (Bill & Gloria Gaither), Sujud Di AltarNya (Symphony Worship)' },
+          { label: 'Lagu Pilihan (pilih 1)', value: 'Karya Terbesar (Sari Simorangkir), Bersorak Sorai (True Worshippers), Allahku Dahsyat (Sound of Hope), Goodness of God (Bethel Music, Jane John)' },
+        ]},
+        { tag: 'SMA', rows: [
+          { label: 'Kuota', value: '10&ndash;30 peserta' },
+          { label: 'Hari & Tanggal', value: 'Rabu, 16 September 2026' },
+          { label: 'Biaya Pendaftaran', value: 'Rp100.000 + jaminan (WO) Rp50.000' },
+          { label: 'Lagu Wajib (pilih 1)', value: 'Never Enough (Loren Allred), Part of Your World (Halle Bailey), Die on This Hill (Sienna Spiro), Kasih Putih (Glenn Fredly), Sepatu (Tulus)' },
+          { label: 'Lagu Pilihan', value: 'Bebas (tidak boleh menyinggung SARA/unsur negatif)' },
+        ]},
+      ],
+      hadiahGroups: [
+        { label: 'SMP', rows: [
+          { label: 'Juara 1', value: 'Rp500.000 + Flazz + E-Certificate' },
+          { label: 'Juara 2', value: 'Rp400.000 + Flazz + E-Certificate' },
+          { label: 'Juara 3', value: 'Rp300.000 + Flazz + E-Certificate' },
+        ]},
+        { label: 'SMA', rows: [
+          { label: 'Juara 1', value: 'Rp1.000.000 + Sertifikat + Piala' },
+          { label: 'Juara 2', value: 'Rp750.000 + Sertifikat + Piala' },
+          { label: 'Juara 3', value: 'Rp500.000 + Sertifikat + Piala' },
+        ]},
+      ],
+      ketentuan: [
+        'Peserta yang dipanggil 3 kali namun tidak hadir dinyatakan diskualifikasi & uang WO hangus.',
+        'Musik pengiring: gitaris/pianis (salah satu) atau backing track/minus one (MP3), dikirim peserta lewat drive/link yang disediakan panitia.',
+        'Tidak ada penggantian peserta setelah Technical Meeting; urutan tampil diundi saat TM.',
+        'Penilaian juri bersifat mutlak; kecurangan atau intervensi terhadap juri berakibat diskualifikasi.',
+        'Peserta & pengunjung wajib berpakaian sopan sesuai tata tertib sekolah masing-masing.',
+      ],
+      contacts: [
+        { label: 'SMP', name: 'Gavrila Fadersair', wa: '081290571409', ig: '@gavifdr' },
+        { label: 'SMA', name: 'Kezia Grace', wa: '0895343267177', ig: '@kez.grace_' },
+      ],
+    },
+    VocalGroup: {
+      meta: [
+        { icon: '👥', label: 'Peserta', value: 'SMP/Sederajat &middot; 4&ndash;8 anggota' },
+        { icon: '📍', label: 'Wilayah', value: 'DKI Jakarta & sekitarnya' },
+        { icon: '🎵', label: 'Format', value: '2 lagu (1 wajib + 1 pilihan)' },
+        { icon: '📅', label: 'Hari & Tanggal', value: 'Sabtu, 12 September 2026' },
+        { icon: '💳', label: 'Biaya Pendaftaran', value: 'Rp50.000 per tim' },
+      ],
+      hadiahGroups: [{ rows: [
+        { label: 'Juara 1', value: 'Rp800.000 + Flazz + E-Certificate' },
+        { label: 'Juara 2', value: 'Rp700.000 + Flazz + E-Certificate' },
+        { label: 'Juara 3', value: 'Rp600.000 + Flazz + E-Certificate' },
+      ]}],
+      ketentuan: [
+        'Maksimal 1 tim per sekolah.',
+        'Lagu wajib: Give Thanks &ndash; Don Moen.',
+        'Lagu pilihan: Allah Sanggup atau Kita Usahakan Lagi.',
+        'Durasi penampilan maksimal 10 menit.',
+        'Boleh menggunakan MIDI atau instrumen (gitar/keyboard) sebagai pengiring.',
+      ],
+    },
+  };
+
+  function renderCompDetailExtra(comp) {
+    const el = document.getElementById('rockDetailExtra');
+    const d = COMPETITION_DETAILS[comp.file];
+    if (!d) { el.innerHTML = ''; return; }
+
+    const metaHtml = `<div class="comp-detail-grid">${d.meta.map(m => `
+      <div class="comp-detail-item">
+        <div class="comp-detail-icon">${m.icon}</div>
+        <div>
+          <p class="comp-detail-label">${m.label}</p>
+          <p class="comp-detail-value">${m.value}</p>
+        </div>
+      </div>`).join('')}</div>`;
+
+    const variantsHtml = d.variants ? `<div class="comp-variants">${d.variants.map(v => `
+      <div class="comp-variant-card">
+        <span class="comp-variant-tag">${v.tag}</span>
+        ${v.rows.map(r => `
+          <div class="comp-variant-row">
+            <p class="comp-variant-label">${r.label}</p>
+            <p class="comp-variant-value">${r.value}</p>
+          </div>`).join('')}
+      </div>`).join('')}</div>` : '';
+
+    const hadiahHtml = `<h4 class="comp-section-title">Hadiah</h4>` + d.hadiahGroups.map(g => `
+      ${g.label ? `<p class="comp-hadiah-group-label">${g.label}</p>` : ''}
+      ${g.rows.map(r => `
+        <div class="comp-hadiah-row">
+          <span class="comp-hadiah-key">${r.label}</span>
+          <span class="comp-hadiah-val">${r.value}</span>
+        </div>`).join('')}
+    `).join('');
+
+    const ketentuanHtml = `<h4 class="comp-section-title">Ketentuan Singkat</h4>
+      <ul class="comp-ketentuan">${d.ketentuan.map(k => `<li>${k}</li>`).join('')}</ul>`;
+
+    const contactHtml = d.contacts ? d.contacts.map(c => `
+      <div class="comp-contact">
+        <div class="comp-contact-icon">✉️</div>
+        <div>
+          <p class="comp-contact-name">${c.label ? `${c.label} &mdash; ` : ''}${c.name}</p>
+          <p class="comp-contact-sub">WA ${c.wa} &middot; IG ${c.ig}</p>
+        </div>
+      </div>`).join('') : '';
+
+    el.innerHTML = `${metaHtml}${variantsHtml}${hadiahHtml}${ketentuanHtml}${contactHtml}`;
+  }
 
   function buildRockScatter() {
     const stage = document.getElementById('rockScatter');
@@ -1382,7 +2379,6 @@
 
   function openRockDetail(comp) {
     document.getElementById('rockDetailTitle').textContent = comp.label;
-    document.getElementById('rockDetailDesc').textContent = comp.desc || '';
 
     const card = document.querySelector('.rock-detail-card');
     const photoEl = document.getElementById('rockDetailPhoto');
@@ -1394,6 +2390,8 @@
       photoEl.removeAttribute('src');
       card.classList.add('no-photo');
     }
+
+    renderCompDetailExtra(comp);
 
     document.getElementById('rockOverlay').classList.add('active');
   }
