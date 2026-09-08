@@ -15,15 +15,18 @@
      it plus a second Lenis instance and a countdown-scroll-lock
      block that targeted an #about element that doesn't exist on
      this page -- dead weight, removed. -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
 
 <style>
   * { box-sizing: border-box; }
+  /* Force Cinzel everywhere, including form controls (button/input/
+     select/textarea), which browsers do NOT inherit body's font-family
+     into by default. */
+  *, *::before, *::after { font-family: 'Cinzel', serif; }
   html { scroll-behavior: auto; } /* never smooth-scroll alongside Lenis */
   body {
     margin: 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: #fff;
     background-color: #0C0129;
   }
@@ -78,7 +81,7 @@
     padding: 10px 0 10px 30px;
     font-size: 15px;
     font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     white-space: nowrap;
@@ -284,7 +287,7 @@
     width: 100%;
   }
   .about-body-text {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: clamp(16px, 2vw, 21px);
     line-height: 1.8;
     color: rgba(255, 255, 255, 0.9);
@@ -316,54 +319,53 @@
   }
 
   /* ============================================================
-     HISTORY -- pinned section containing a manually-controlled
-     carousel. The section itself uses position:sticky so it holds
-     in the viewport while you're in this area of the page, but the
-     horizontal navigation between videos is entirely manual (arrow
-     buttons, drag/swipe, dot clicks, arrow keys) -- nothing is
-     driven by continuous scroll position, so there's no per-frame
-     recalculation that can desync/reset like the earlier
-     GSAP ScrollTrigger scrub approach did.
+     HISTORY -- normal (non-pinned) section holding a manually-
+     controlled carousel of past theme song videos only (the
+     documentation gallery slides that used to live at the end of
+     this same carousel have been removed entirely). Previously this
+     used position:sticky plus a wheel handler to pin the section and
+     trap scroll while stepping through slides; that's dropped now in
+     favor of just letting the section scroll past like any other
+     section on the page. Sized the same fixed-aspect-ratio way as
+     the other about-page background sections (see .about-hero /
+     .about-body) instead of a tall 200vh scroll-jacked box, so it
+     can't get clipped on odd screen sizes/zoom levels the way the
+     sticky version sometimes did. Navigation is entirely manual:
+     arrow buttons, drag/swipe, dot clicks, and arrow keys.
      ============================================================ */
-  .history-pin-trigger {
+  .history-section {
     position: relative;
     width: 100%;
-    height: 200vh;
-    background: #142310;
-  }
-  /* Bottom fade -- eases into the footer's own solid background
-     color (#2a3b1c, matching its vector illustration's near-treeline
-     fill) so this section blends straight into the footer instead
-     of cutting hard at the boundary. Same eased-curve treatment used
-     on index.html's pathway-to-footer seam. */
-  .history-pin-trigger::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    height: 300px;
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(42, 59, 28, 0.25) 35%,
-      rgba(42, 59, 28, 0.65) 65%,
-      #2a3b1c 100%
-    );
-    z-index: 5;
-    pointer-events: none;
-  }
-  .history-stage {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100dvh;
+    aspect-ratio: 1600 / 900;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: clamp(16px, 3vw, 32px);
+    padding: clamp(40px, 8vw, 100px) 20px;
   }
-  .history-stage-bg {
+  /* Bottom fade -- eases the busy background photo down into the
+     exact same flat #142310 that the Sylvara theme section's own
+     top-fade starts from, so the seam between the two sections lines
+     up perfectly. Same eased-curve treatment used everywhere else on
+     the site. */
+  .history-section::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 220px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(20, 35, 16, 0.25) 35%,
+      rgba(20, 35, 16, 0.65) 65%,
+      #142310 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+  .history-section-bg {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -401,10 +403,10 @@
   }
 
   .history-carousel {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(10px, 2vw, 24px);
     width: 100%;
     padding: 0 16px;
   }
@@ -422,6 +424,43 @@
     transition: none;
     cursor: grabbing;
   }
+  /* Prev/next float over the edges of the viewport rather than
+     sitting inline in the row -- keeps the carousel perfectly
+     centered and doesn't add to the row's width on narrow screens,
+     where an inline arrow on each side would force the viewport
+     itself to shrink or overflow. */
+  .history-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: clamp(34px, 4vw, 48px);
+    height: clamp(34px, 4vw, 48px);
+    border-radius: 50%;
+    border: 2px solid rgba(252, 221, 139, 0.5);
+    background: rgba(20, 35, 16, 0.6);
+    color: #FCDD8B;
+    font-size: clamp(15px, 1.8vw, 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    box-shadow: 0 0 14px rgba(252, 221, 139, 0.25);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  }
+  .history-arrow:hover {
+    background: rgba(252, 221, 139, 0.18);
+    border-color: #FCDD8B;
+    transform: translateY(-50%) scale(1.08);
+  }
+  .history-arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+  }
+  .history-arrow-prev { left: 0; }
+  .history-arrow-next { right: 0; }
   .history-carousel-dots {
     display: flex;
     gap: 10px;
@@ -489,7 +528,7 @@
   }
   .history-video-meta {
     text-align: center;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: rgba(255, 255, 255, 0.8);
     font-size: clamp(12px, 1.3vw, 14px);
     line-height: 1.3;
@@ -502,7 +541,7 @@
   .history-video-link {
     display: block;
     text-align: center;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 13px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.65);
@@ -511,74 +550,171 @@
   }
   .history-video-link:hover { color: #FCDD8B; }
   @media (max-width: 768px) {
-    .history-stage {
-      justify-content: flex-start;
-      padding-top: 95px;
+    .history-section {
+      aspect-ratio: auto;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: visible;
+      padding-top: 100px;
       gap: clamp(10px, 2.5vh, 20px);
     }
     .history-heading-wrap { width: min(58vw, 300px); }
     .history-carousel-viewport { width: min(80vw, 380px); }
     .history-carousel-dots { margin-top: 4px; }
+    .history-arrow { width: 34px; height: 34px; font-size: 14px; }
   }
 
   /* ============================================================
-     GALLERY -- now folded into the same pinned History carousel as
-     3 additional slides after the 5 videos, reusing the exact same
-     track/dots/drag/wheel mechanism (see JS) instead of a separate
-     scroll system. Each slide is a gapless 4x3 grid (12 units,
-     tiled exactly by 6 images: one 2x2, one 2x1, two 1x1, two 2x1)
-     using explicit positional classes -- the earlier :nth-of-type
-     approach was a real bug: it counts ALL sibling <div>s by tag,
-     not filtered by class, so it was landing on the wrong elements
-     entirely and leaving unintended gaps.
+     THEME SECTION -- introduces this year's theme, "Sylvara". Full-
+     bleed magical forest-pond photo, with the Sylvara logo + a short
+     description centered over it. Two gradient overlays handle the
+     seams: .theme-fade-top matches history's own #142310 (that
+     section's bg) fading down into the photo, and .theme-fade-bottom
+     matches the footer's #2a3b1c fading the photo down into it --
+     same eased 4-stop curve used everywhere else on the site, just
+     painted as an overlay since the photo itself has no flat edge
+     color to gradient from/to directly. A soft vignette keeps the
+     logo/text legible against the bright photo, and a field of
+     upward-drifting light motes (generated in JS, see script block)
+     sells the "magical" feel.
      ============================================================ */
-  .gallery-slide {
-    flex: 0 0 100%;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 6px;
+  .theme-section {
+    position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    border-radius: 20px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    /* Fade the left/right edges to transparent instead of a hard
-       rectangular cutoff -- softens the "boxy" look */
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    background: #142310;
+    margin-top: -1px; /* guards against a subpixel seam at the history/theme boundary -- both are the same flat #142310, this just makes sure they overlap instead of leaving a hairline gap */
   }
-  .gallery-item {
-    overflow: hidden;
-  }
-  .gallery-item img {
+  .theme-bg {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
+    object-position: center;
+    z-index: 1;
+  }
+  .theme-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+      radial-gradient(ellipse at 50% 45%, transparent 0%, transparent 35%, rgba(8, 16, 6, 0.55) 100%),
+      linear-gradient(to bottom, rgba(8, 16, 6, 0.25) 0%, transparent 22%, transparent 78%, rgba(8, 16, 6, 0.35) 100%);
     pointer-events: none;
   }
-  /* Explicit, gapless 4x3 tiling -- every cell filled, no unused space */
-  .g-pos-1 { grid-column: 1 / 3; grid-row: 1 / 3; } /* big 2x2 top-left */
-  .g-pos-2 { grid-column: 3 / 5; grid-row: 1 / 2; } /* wide 2x1 top-right */
-  .g-pos-3 { grid-column: 3 / 4; grid-row: 2 / 3; } /* small 1x1 */
-  .g-pos-4 { grid-column: 4 / 5; grid-row: 2 / 3; } /* small 1x1 */
-  .g-pos-5 { grid-column: 1 / 3; grid-row: 3 / 4; } /* wide 2x1 bottom-left */
-  .g-pos-6 { grid-column: 3 / 5; grid-row: 3 / 4; } /* wide 2x1 bottom-right */
-  @media (max-width: 768px) {
-    .gallery-slide {
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      aspect-ratio: 3 / 4;
-    }
-    .g-pos-1 { grid-column: 1 / 3; grid-row: 1 / 2; }
-    .g-pos-2 { grid-column: 1 / 2; grid-row: 2 / 3; }
-    .g-pos-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
-    .g-pos-4 { grid-column: 1 / 2; grid-row: 3 / 4; }
-    .g-pos-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
-    .g-pos-6 { grid-column: 1 / 3; grid-row: 4 / 5; }
+  .theme-fade-top {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 280px;
+    z-index: 3;
+    background: linear-gradient(
+      to bottom,
+      #142310 0%,
+      rgba(20, 35, 16, 0.65) 35%,
+      rgba(20, 35, 16, 0.25) 65%,
+      transparent 100%
+    );
+    pointer-events: none;
   }
-
+  .theme-fade-bottom {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 300px;
+    z-index: 3;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(42, 59, 28, 0.25) 35%,
+      rgba(42, 59, 28, 0.65) 65%,
+      #2a3b1c 100%
+    );
+    pointer-events: none;
+  }
+  .theme-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .theme-particle {
+    position: absolute;
+    bottom: -5%;
+    left: var(--x, 50%);
+    width: var(--size, 4px);
+    height: var(--size, 4px);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 244, 214, 0.95) 0%, rgba(255, 221, 139, 0.55) 45%, rgba(255, 221, 139, 0) 75%);
+    filter: blur(0.4px);
+    animation-name: theme-particle-rise;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes theme-particle-rise {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    12%  { opacity: var(--op, 0.85); }
+    50%  { transform: translate(var(--drift, 24px), -55vh); }
+    88%  { opacity: var(--op, 0.85); }
+    100% { transform: translate(calc(var(--drift, 24px) * -1), -110vh); opacity: 0; }
+  }
+  .theme-content {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: clamp(60px, 12vw, 120px) 24px;
+  }
+  .theme-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: clamp(12px, 1.4vw, 15px);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #FCDD8B;
+    /* This sits right over the brightest sunbeam patch of the photo,
+       where a glow-only shadow (as used elsewhere for gold text)
+       washed out against the near-white background and made letters
+       disappear. Added real dark shadow layers -- same idea as the
+       pathway sign labels on index.html -- so the text keeps a dark
+       edge and stays legible no matter how bright the art behind it
+       gets. */
+    text-shadow:
+      0 0 10px rgba(255, 210, 60, 0.6),
+      0 1px 3px rgba(0, 0, 0, 0.95),
+      0 2px 6px rgba(0, 0, 0, 0.9),
+      0 0 16px rgba(0, 0, 0, 0.7);
+    margin: 0 0 18px;
+  }
+  /* Sized to match the hero's own Sylvara lockup (.forest-logo img,
+     index.html) exactly -- same asset, same "as big as the hero"
+     presence, rather than the smaller badge-sized treatment this
+     used before. Wrapped so the negative margin below can be a
+     percentage of the LOGO's own rendered width (percentages resolve
+     against the containing block's width) -- Sylvara.webp carries
+     ~25% of empty transparent canvas below the visible art (measured
+     directly off the file), which was showing up as a large dead gap
+     between the logo and the description card below it. */
+  .theme-logo-wrap {
+    width: min(96vw, 1180px);
+  }
+  .theme-logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 0 -12%;
+    animation: logo-float 4.5s ease-in-out infinite;
+    filter:
+      drop-shadow(0 0 32px rgba(252, 221, 139, 0.55))
+      drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6));
+  }
   /* ============================================================
      FOOTER -- same elements as before (rusa loop video, Sylvara
      mark, socials, contact, copyright), restructured into the
@@ -595,7 +731,7 @@
     background: #2a3b1c;
     color: rgba(255, 255, 255, 0.85);
     font-size: 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     overflow: hidden;
   }
   /* Flat-vector landscape band -- layered ridge/treeline shapes, a
@@ -801,17 +937,17 @@
   </section>
 </div>
 
-<section class="history-pin-trigger" id="historyPinTrigger">
-  <div class="history-stage">
-    <img src="assets/img/AboutPageBackground3.png" class="history-stage-bg" alt="" loading="lazy">
-    <div class="history-heading-wrap">
-      <img src="assets/img/headings/History.png" class="history-heading-img" alt="History" loading="lazy">
-    </div>
+<section class="history-section" id="historySection">
+  <img src="assets/img/AboutPageBackground3.png" class="history-section-bg" alt="" loading="lazy">
+  <div class="history-heading-wrap">
+    <img src="assets/img/headings/History.png" class="history-heading-img" alt="History" loading="lazy">
+  </div>
 
-    <div class="history-carousel">
+  <div class="history-carousel">
+    <button class="history-arrow history-arrow-prev" id="historyPrev" aria-label="Previous video">&#8592;</button>
 
-      <div class="history-carousel-viewport">
-        <div class="history-carousel-track" id="historyCarouselTrack">
+    <div class="history-carousel-viewport">
+      <div class="history-carousel-track" id="historyCarouselTrack">
 
           <div class="history-video-card" style="--card-color-a:#2a1a52; --card-color-b:#140a2e;">
             <div class="history-video-frame">
@@ -863,49 +999,33 @@
             <a class="history-video-link" href="https://www.youtube.com/watch?v=MGm60hgxD7U" target="_blank" rel="noopener">Watch on YouTube &#8599;</a>
           </div>
 
-          <div class="gallery-slide">
-            <div class="gallery-item g-pos-1"><img src="assets/img/Documentation/Gallery1.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-2"><img src="assets/img/Documentation/Gallery2.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-3"><img src="assets/img/Documentation/Gallery3.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-4"><img src="assets/img/Documentation/Gallery4.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-5"><img src="assets/img/Documentation/Gallery5.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-6"><img src="assets/img/Documentation/Gallery6.webp" alt="Fortelations documentation" loading="lazy"></div>
-          </div>
-
-          <div class="gallery-slide">
-            <div class="gallery-item g-pos-1"><img src="assets/img/Documentation/Gallery7.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-2"><img src="assets/img/Documentation/Gallery8.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-3"><img src="assets/img/Documentation/Gallery9.jpg" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-4"><img src="assets/img/Documentation/Gallery10.jpg" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-5"><img src="assets/img/Documentation/Gallery1.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-6"><img src="assets/img/Documentation/Gallery3.webp" alt="Fortelations documentation" loading="lazy"></div>
-          </div>
-
-          <div class="gallery-slide">
-            <div class="gallery-item g-pos-1"><img src="assets/img/Documentation/Gallery5.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-2"><img src="assets/img/Documentation/Gallery7.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-3"><img src="assets/img/Documentation/Gallery9.jpg" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-4"><img src="assets/img/Documentation/Gallery2.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-5"><img src="assets/img/Documentation/Gallery4.webp" alt="Fortelations documentation" loading="lazy"></div>
-            <div class="gallery-item g-pos-6"><img src="assets/img/Documentation/Gallery6.webp" alt="Fortelations documentation" loading="lazy"></div>
-          </div>
-
         </div>
       </div>
 
+      <button class="history-arrow history-arrow-next" id="historyNext" aria-label="Next video">&#8594;</button>
     </div>
 
-    <div class="history-carousel-dots" id="historyDots">
-      <button class="history-dot is-active" data-index="0" aria-label="Video 1"></button>
-      <button class="history-dot" data-index="1" aria-label="Video 2"></button>
-      <button class="history-dot" data-index="2" aria-label="Video 3"></button>
-      <button class="history-dot" data-index="3" aria-label="Video 4"></button>
-      <button class="history-dot" data-index="4" aria-label="Video 5"></button>
-      <button class="history-dot" data-index="5" aria-label="Gallery 1"></button>
-      <button class="history-dot" data-index="6" aria-label="Gallery 2"></button>
-      <button class="history-dot" data-index="7" aria-label="Gallery 3"></button>
+  <div class="history-carousel-dots" id="historyDots">
+    <button class="history-dot is-active" data-index="0" aria-label="Video 1"></button>
+    <button class="history-dot" data-index="1" aria-label="Video 2"></button>
+    <button class="history-dot" data-index="2" aria-label="Video 3"></button>
+    <button class="history-dot" data-index="3" aria-label="Video 4"></button>
+    <button class="history-dot" data-index="4" aria-label="Video 5"></button>
+  </div>
+</section>
+
+<section class="theme-section" id="themeSection">
+  <img src="assets/img/SylvaraTheme.png" class="theme-bg" alt="" loading="lazy">
+  <div class="theme-vignette" aria-hidden="true"></div>
+  <div class="theme-fade-top" aria-hidden="true"></div>
+  <div class="theme-particles" id="themeParticles" aria-hidden="true"></div>
+  <div class="theme-content">
+    <p class="theme-eyebrow">This Year's Theme</p>
+    <div class="theme-logo-wrap">
+      <img src="assets/img/Sylvara.webp" class="theme-logo" alt="Sylvara">
     </div>
   </div>
+  <div class="theme-fade-bottom" aria-hidden="true"></div>
 </section>
 
 <footer id="footer">
@@ -1020,13 +1140,52 @@
     updateHeaderScrolled();
   }
 
+  // ---------- Theme section: rising magical particles ----------
+  // Generates a field of light motes that drift upward from the
+  // bottom of the theme section, each with randomized position,
+  // size, drift, and timing (negative delays so they appear already
+  // mid-flight on load instead of all starting from the ground at
+  // once) via inline CSS custom properties feeding the shared
+  // theme-particle-rise keyframe.
+  (function themeParticles() {
+    const container = document.getElementById('themeParticles');
+    if (!container) return;
+
+    const COUNT = 28;
+    const frag = document.createDocumentFragment();
+
+    for (let i = 0; i < COUNT; i++) {
+      const span = document.createElement('span');
+      span.className = 'theme-particle';
+
+      const x = (Math.random() * 100).toFixed(1) + '%';
+      const size = (2 + Math.random() * 4).toFixed(1) + 'px';
+      const duration = (7 + Math.random() * 8).toFixed(2) + 's';
+      const delay = (-Math.random() * 15).toFixed(2) + 's'; // negative -> already mid-animation on load
+      const drift = (Math.random() * 60 - 30).toFixed(0) + 'px';
+      const op = (0.45 + Math.random() * 0.5).toFixed(2);
+
+      span.style.cssText =
+        '--x:' + x +
+        '; --size:' + size +
+        '; --drift:' + drift +
+        '; --op:' + op +
+        '; animation-duration:' + duration +
+        '; animation-delay:' + delay + ';';
+
+      frag.appendChild(span);
+    }
+
+    container.appendChild(frag);
+  })();
+
   // ---------- History: manual carousel ----------
-  // Navigation between videos is entirely manual (buttons, drag,
-  // dots, arrow keys) -- nothing here is driven by continuous
-  // scroll position, so there's no per-frame recalculation that can
-  // desync/reset the way the earlier GSAP ScrollTrigger scrub did.
-  // The section itself still uses position:sticky (see CSS) so it
-  // holds in the viewport while you're in this area of the page.
+  // Navigation between videos is entirely manual (arrow buttons,
+  // drag, dots, arrow keys). This section is no longer pinned via
+  // position:sticky -- it just scrolls past normally like everything
+  // else on the page (same fixed aspect-ratio sizing as the other
+  // about-page background sections), so there's no scroll-jacking
+  // wheel handler here anymore either.
   (function historyCarousel() {
     const track = document.getElementById('historyCarouselTrack');
     if (!track) return;
@@ -1034,17 +1193,24 @@
     const cards = Array.from(track.children);
     const count = cards.length;
     const dots = Array.from(document.querySelectorAll('#historyDots .history-dot'));
+    const prevBtn = document.getElementById('historyPrev');
+    const nextBtn = document.getElementById('historyNext');
     let index = 0;
 
     function render() {
       track.style.transform = `translateX(-${index * 100}%)`;
       dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index === count - 1;
     }
 
     function goTo(i) {
       index = Math.max(0, Math.min(count - 1, i));
       render();
     }
+
+    prevBtn?.addEventListener('click', () => goTo(index - 1));
+    nextBtn?.addEventListener('click', () => goTo(index + 1));
 
     dots.forEach((dot) => {
       dot.addEventListener('click', () => goTo(Number(dot.dataset.index)));
@@ -1096,61 +1262,6 @@
       if (e.key === 'ArrowLeft') goTo(index - 1);
       if (e.key === 'ArrowRight') goTo(index + 1);
     });
-
-    // ---------- Wheel-driven navigation ----------
-    // Scrolling down while over the carousel advances to the next
-    // video, scrolling up goes back to the previous one. This
-    // direction matters: scroll-down has to mean "go forward
-    // through the videos" so that starting on video 1 and scrolling
-    // down actually engages the carousel and holds you here until
-    // you've reached the last video -- if down mapped to "previous"
-    // instead, video 1 (already the first) would immediately hit
-    // that boundary and fall straight through to normal page
-    // scroll, skipping the pinned carousel entirely.
-    // Listens on the whole .history-stage rather than just the
-    // narrow viewport -- each video's YouTube iframe is a
-    // cross-origin embed, and wheel events that happen while the
-    // cursor is directly over a cross-origin iframe are captured by
-    // that iframe's own document and never bubble up to us. Since
-    // the iframe now covers most of each card, listening on the
-    // wider stage instead gives scroll a much bigger area to
-    // actually reach this handler.
-    // Debounced to one step per scroll gesture (wheel fires many
-    // times during a single physical scroll motion). Releases back
-    // to normal page scroll once you're at the first/last video, so
-    // scrolling is never trapped in this section.
-    const stageEl = document.querySelector('.history-stage') || track;
-    let wheelCooldown = false;
-
-    function isStageReasonablyInView() {
-      const rect = stageEl.getBoundingClientRect();
-      // Loosened from requiring pixel-perfect full-viewport coverage
-      // to just requiring most of the stage to be visible. The sticky
-      // mechanism itself already keeps the stage filling the screen
-      // once it's actually pinned, so this doesn't need to gate that
-      // precisely -- it was mostly just delaying activation
-      // unnecessarily on some screens/zoom levels.
-      const visibleTop = Math.max(rect.top, 0);
-      const visibleBottom = Math.min(rect.bottom, window.innerHeight);
-      const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-      return visibleHeight >= window.innerHeight * 0.7;
-    }
-
-    stageEl.addEventListener('wheel', (e) => {
-      if (!isStageReasonablyInView()) return; // still scrolling into place -- let the page scroll normally
-
-      const scrollingDown = e.deltaY > 0;
-      const goingToNext = scrollingDown; // scroll down -> advance forward
-      const canMove = goingToNext ? index < count - 1 : index > 0;
-
-      if (!canMove) return; // at a boundary -- let the page scroll normally
-
-      e.preventDefault();
-      if (wheelCooldown) return;
-      wheelCooldown = true;
-      goTo(goingToNext ? index + 1 : index - 1);
-      setTimeout(() => { wheelCooldown = false; }, 780);
-    }, { passive: false });
 
     render();
   })();

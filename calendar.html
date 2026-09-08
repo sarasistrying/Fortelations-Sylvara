@@ -19,15 +19,18 @@
      "scrolling doesn't feel smooth" complaint -- removing it should
      make scrolling feel like plain native scrolling, because now it
      is. -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
 
 <style>
   * { box-sizing: border-box; }
+  /* Force Cinzel everywhere, including form controls (button/input/
+     select/textarea), which browsers do NOT inherit body's font-family
+     into by default. */
+  *, *::before, *::after { font-family: 'Cinzel', serif; }
   html { scroll-behavior: auto; }
   body {
     margin: 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: #fff;
     background-color: #0C0129;
   }
@@ -36,6 +39,46 @@
   @keyframes logo-float {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.02); }
+  }
+
+  /* ---------- ambient rising glitter -----------------------------
+     Fixed full-page overlay so the motes drift upward across
+     whatever part of the page you're scrolled to, rather than being
+     scoped to one section. Same technique as the Sylvara theme
+     section's magical particles on about.html: JS generates the
+     motes with randomized per-particle custom properties (position,
+     size, duration, delay -- negative delays so they're already
+     mid-flight on load instead of all starting from the bottom at
+     once) feeding this one shared keyframe. Sits above the page
+     background/content (z-index:5) but well below the fixed header
+     (z-index:997) so it never covers the nav, and pointer-events:none
+     throughout means it never blocks clicks on the planks underneath. */
+  .calendar-particles {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .calendar-particle {
+    position: absolute;
+    bottom: -5%;
+    left: var(--x, 50%);
+    width: var(--size, 4px);
+    height: var(--size, 4px);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 244, 214, 0.95) 0%, rgba(255, 221, 139, 0.55) 45%, rgba(255, 221, 139, 0) 75%);
+    filter: blur(0.4px);
+    animation-name: calendar-particle-rise;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes calendar-particle-rise {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    12%  { opacity: var(--op, 0.85); }
+    50%  { transform: translate(var(--drift, 24px), -55vh); }
+    88%  { opacity: var(--op, 0.85); }
+    100% { transform: translate(calc(var(--drift, 24px) * -1), -110vh); opacity: 0; }
   }
 
   /* ---------- header/nav -- identical pattern to index.html/about.html ---------- */
@@ -82,7 +125,7 @@
     padding: 10px 0 10px 30px;
     font-size: 15px;
     font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     white-space: nowrap;
@@ -322,13 +365,19 @@
     font-size: clamp(13px, 1.5vw, 18px);
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: #2C1205;
+    color: #FCDD8B;
     text-align: center;
     padding: 0 20%;
+    /* Matches the gold-text-plus-drop-shadow treatment used on the
+       pathway signs (.pathway-sign-text, index.html) -- swapped from
+       the old dark-text-with-gold-halo look to actual yellow text,
+       with a real dark shadow underneath so it still reads clearly
+       against the light plank wood instead of relying on the glow
+       alone for contrast. */
     text-shadow:
-      0 0 8px rgba(255, 210, 60, 0.9),
-      0 0 16px rgba(255, 180, 20, 0.7),
-      0 0 28px rgba(255, 160, 0, 0.5);
+      0 0 8px rgba(255, 210, 60, 0.7),
+      0 2px 3px rgba(0, 0, 0, 0.85),
+      0 1px 2px rgba(0, 0, 0, 0.9);
     pointer-events: none;
   }
 
@@ -385,7 +434,7 @@
   }
 
   .plank-detail-desc {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: rgba(255, 255, 255, 0.85);
     font-size: 15px;
     line-height: 1.6;
@@ -421,7 +470,7 @@
 
   .plank-countdown-label {
     display: block;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-weight: 600;
     font-size: clamp(9px, 1.2vw, 11px);
     letter-spacing: 0.5px;
@@ -430,7 +479,7 @@
   }
 
   .plank-countdown-passed {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: #FCDD8B;
     font-weight: 700;
     font-size: 16px;
@@ -481,7 +530,7 @@
     background: #1c3109;
     color: rgba(255, 255, 255, 0.85);
     font-size: 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     overflow: hidden;
   }
   /* Flat-vector landscape band -- layered ridge/treeline shapes, a
@@ -649,6 +698,8 @@
 </head>
 
 <body>
+
+<div class="calendar-particles" id="calendarParticles" aria-hidden="true"></div>
 
 <header>
   <div class="container">
@@ -819,6 +870,45 @@
     updateHeaderScrolled();
   }
 
+  // ---------- Ambient rising glitter ----------
+  // Same generator as the Sylvara theme section's magical particles
+  // on about.html: randomized position/size/duration/drift per mote,
+  // with negative animation-delay so they're already mid-flight on
+  // load instead of all starting from the bottom at once. This one
+  // lives in a fixed full-page container (see CSS), so it drifts
+  // over the whole page as you scroll rather than just one section.
+  (function calendarParticles() {
+    const container = document.getElementById('calendarParticles');
+    if (!container) return;
+
+    const COUNT = 28;
+    const frag = document.createDocumentFragment();
+
+    for (let i = 0; i < COUNT; i++) {
+      const span = document.createElement('span');
+      span.className = 'calendar-particle';
+
+      const x = (Math.random() * 100).toFixed(1) + '%';
+      const size = (2 + Math.random() * 4).toFixed(1) + 'px';
+      const duration = (7 + Math.random() * 8).toFixed(2) + 's';
+      const delay = (-Math.random() * 15).toFixed(2) + 's'; // negative -> already mid-animation on load
+      const drift = (Math.random() * 60 - 30).toFixed(0) + 'px';
+      const op = (0.45 + Math.random() * 0.5).toFixed(2);
+
+      span.style.cssText =
+        '--x:' + x +
+        '; --size:' + size +
+        '; --drift:' + drift +
+        '; --op:' + op +
+        '; animation-duration:' + duration +
+        '; animation-delay:' + delay + ';';
+
+      frag.appendChild(span);
+    }
+
+    container.appendChild(frag);
+  })();
+
   /* ============================================================
      CALENDAR PAGE -- VERTICAL PATHWAY SCATTER
      Mirrors the Competitions rock-scatter approach from index.html:
@@ -837,17 +927,23 @@
        desc  : description shown in the detail panel
        art   : optional override for plank image; defaults to alternating plank1/plank2
   ============================================================ */
+  // Dates updated to match Fortelations' actual schedule: Opening on
+  // September 12 (Sat), running one day per plank through Closing on
+  // September 20 (Sun). Technical Meeting is set to September 7
+  // (Mon), matching the date already referenced in a couple of the
+  // competition ketentuan on index.html (CCA, MUN) rather than being
+  // folded into the consecutive Opening-to-Closing run.
   const PLANKS = [
-    { label: "Technical Meeting", top: 3.3,  left: 32.9, size: 26, z: 3, date: "September 1, 2026",  desc: "Coordinators and team representatives align on rules, schedules, and logistics ahead of the festival." },
-    { label: "Opening",           top: 14.6, left: 72.5, size: 26, z: 3, date: "September 2, 2026",  desc: "Sylvara officially begins — opening ceremony, welcome address, and the first taste of festival energy." },
-    { label: "Day 1",             top: 23.1, left: 28.3, size: 26, z: 3, date: "September 3, 2026",  desc: "The first full day of competitions kicks off across every category." },
-    { label: "Day 2",             top: 32.9, left: 66.3, size: 26, z: 3, date: "September 4, 2026",  desc: "Competitions continue, with new categories taking the stage." },
-    { label: "Day 3",             top: 44.7, left: 27.3, size: 26, z: 3, date: "September 5, 2026",  desc: "Midway through the festival — more heats, more performances, more energy." },
-    { label: "Day 4",             top: 54.1, left: 66.1, size: 26, z: 3, date: "September 6, 2026",  desc: "Competitions roll on as finalists begin to emerge across several categories." },
-    { label: "Day 5",             top: 63.4, left: 30.3, size: 26, z: 3, date: "September 7, 2026",  desc: "The penultimate stretch — semifinals and standout showcases." },
-    { label: "Day 6",             top: 75.0, left: 70.1, size: 26, z: 3, date: "September 8, 2026",  desc: "Final competitions wrap up as the festival builds toward its close." },
-    { label: "Day 7",             top: 82.5, left: 28.8, size: 26, z: 3, date: "September 9, 2026",  desc: "The last full day of competition before Sylvara closes its gates." },
-    { label: "Closing",           top: 92.9, left: 72.7, size: 26, z: 3, date: "September 10, 2026", desc: "Awards, farewells, and a final celebration as Sylvara 2026 comes to a close." },
+    { label: "Technical Meeting", top: 3.3,  left: 32.9, size: 26, z: 3, date: "September 7, 2026",  desc: "Coordinators and team representatives align on rules, schedules, and logistics ahead of the festival." },
+    { label: "Opening",           top: 14.6, left: 72.5, size: 26, z: 3, date: "September 12, 2026",  desc: "Sylvara officially begins — opening ceremony, welcome address, and the first taste of festival energy." },
+    { label: "Day 1",             top: 23.1, left: 28.3, size: 26, z: 3, date: "September 13, 2026",  desc: "The first full day of competitions kicks off across every category." },
+    { label: "Day 2",             top: 32.9, left: 66.3, size: 26, z: 3, date: "September 14, 2026",  desc: "Competitions continue, with new categories taking the stage." },
+    { label: "Day 3",             top: 44.7, left: 27.3, size: 26, z: 3, date: "September 15, 2026",  desc: "Midway through the festival — more heats, more performances, more energy." },
+    { label: "Day 4",             top: 54.1, left: 66.1, size: 26, z: 3, date: "September 16, 2026",  desc: "Competitions roll on as finalists begin to emerge across several categories." },
+    { label: "Day 5",             top: 63.4, left: 30.3, size: 26, z: 3, date: "September 17, 2026",  desc: "The penultimate stretch — semifinals and standout showcases." },
+    { label: "Day 6",             top: 75.0, left: 70.1, size: 26, z: 3, date: "September 18, 2026",  desc: "Final competitions wrap up as the festival builds toward its close." },
+    { label: "Day 7",             top: 82.5, left: 28.8, size: 26, z: 3, date: "September 19, 2026",  desc: "The last full day of competition before Sylvara closes its gates." },
+    { label: "Closing",           top: 92.9, left: 72.7, size: 26, z: 3, date: "September 20, 2026", desc: "Awards, farewells, and a final celebration as Sylvara 2026 comes to a close." },
   ];
 
   function buildPlankScatter() {

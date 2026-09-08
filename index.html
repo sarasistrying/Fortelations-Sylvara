@@ -13,16 +13,19 @@
      lean build, those get reintroduced one at a time so we can see
      exactly which one (if any) was the actual conflict, instead of
      guessing against all of them at once. -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
 
 <style>
   * { box-sizing: border-box; }
+  /* Force Cinzel everywhere, including form controls (button/input/
+     select/textarea), which browsers do NOT inherit body's font-family
+     into by default -- this is why "Registration" was rendering in the
+     browser's default UI font even though body was already Cinzel. */
+  *, *::before, *::after { font-family: 'Cinzel', serif; }
   html { scroll-behavior: auto; } /* never smooth-scroll alongside Lenis */
   body {
     margin: 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: #fff;
     background-color: #0C0129;
   }
@@ -81,7 +84,7 @@
     padding: 10px 0 10px 30px;
     font-size: 15px;
     font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     white-space: nowrap;
@@ -588,12 +591,6 @@
       drop-shadow(0 0 12px rgba(239, 157, 109, 0.4));
     animation: logo-float 3s ease-in-out infinite;
   }
-  .competitions-heading p {
-    font-family: 'Open Sans', sans-serif;
-    font-size: clamp(13px, 1.6vw, 16px);
-    color: rgba(255, 255, 255, 0.7);
-    margin: 0;
-  }
   .competitions-bg {
     position: absolute;
     top: 0; left: 0;
@@ -799,7 +796,7 @@
     font-size: 18px;
   }
   .comp-detail-label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 10.5px;
     font-weight: 700;
     letter-spacing: 1.2px;
@@ -808,7 +805,7 @@
     margin: 0 0 4px;
   }
   .comp-detail-value {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 14px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.92);
@@ -836,7 +833,7 @@
   }
   .comp-variant-tag {
     display: inline-block;
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 10.5px;
     font-weight: 800;
     letter-spacing: 1px;
@@ -850,7 +847,7 @@
   .comp-variant-row { margin-bottom: 9px; }
   .comp-variant-row:last-child { margin-bottom: 0; }
   .comp-variant-label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.8px;
@@ -859,13 +856,13 @@
     margin-bottom: 2px;
   }
   .comp-variant-value {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 13px;
     color: rgba(255, 255, 255, 0.88);
     line-height: 1.45;
   }
   .comp-hadiah-group-label {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 10.5px;
     font-weight: 800;
     letter-spacing: 1.2px;
@@ -881,7 +878,7 @@
     gap: 12px;
     padding: 9px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 13.5px;
   }
   .comp-hadiah-row:last-child { border-bottom: none; }
@@ -896,7 +893,7 @@
     position: relative;
     padding-left: 18px;
     margin-bottom: 10px;
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 13px;
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.78);
@@ -931,13 +928,13 @@
     font-size: 15px;
   }
   .comp-contact-name {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 13.5px;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.92);
   }
   .comp-contact-sub {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     font-size: 12px;
     color: rgba(255, 255, 255, 0.55);
   }
@@ -956,6 +953,13 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    /* Safety net: align-content has no explicit value by default,
+       which computes to 'stretch' -- if the two signs ever DO wrap to
+       separate lines (an unusually narrow viewport), stretch was
+       spreading those two lines across the full 100vh height, leaving
+       a huge empty gap with the background's pond stranded between
+       them instead of the signs just stacking closely together. */
+    align-content: center;
     justify-content: space-between;
     padding: 60px 6%;
     gap: 24px 20px;
@@ -997,9 +1001,37 @@
     z-index: 1;
     pointer-events: none;
   }
+  /* Sits absolutely so it doesn't disturb the two-sign flex row below
+     it -- same top-center placement pattern as the other section
+     headings, just positioned instead of stacked in normal flow since
+     .pathway-section is a flex container centering the signs. */
+  .pathway-heading {
+    position: absolute;
+    top: clamp(70px, 8vh, 100px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    z-index: 2;
+    text-align: center;
+    pointer-events: none;
+  }
+  /* Scoped down from the shared .section-heading-img sizing (min(80vw,
+     820px)) -- "Join the Journey" was reading too large/close to the
+     signs below it at this section's width. */
+  .pathway-heading .section-heading-img {
+    width: min(34vw, 360px);
+    /* Cancel the shared class's -12%/-12% vertical margin -- that
+       bleed is meant for headings sitting in normal document flow;
+       here it was pulling the (now smaller) image up behind the
+       fixed header instead. */
+    margin: 0 auto;
+  }
   .pathway-sign {
     position: relative;
     z-index: 1;
+    /* Nudged down off the section's vertical center to open up more
+       breathing room below the "Join the Journey" heading above. */
+    transform: translateY(clamp(24px, 6vh, 70px));
     /* Two of these sit side-by-side in a row with a 40px gap inside
        .pathway-section's 6%-each-side padding. The old clamp(340px,
        46vw,700px) only actually fit two-across once the viewport
@@ -1035,23 +1067,29 @@
   }
   .pathway-sign-content {
     position: absolute;
-    top: 63%; left: 50%;
+    top: 65%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 60%;
+    /* Was 60%, then bumped to 88% to stop the text wrapping to 3
+       lines -- but 88% runs the text right into the flower/vine
+       border decorations at the plank's outer edges, which got more
+       obvious as the signs were sized up. Pulling back to 72% clears
+       those borders; the text stays on 2 lines because the font-size
+       clamp below was tightened at the same time. */
+    width: 72%;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(6px, 2.2cqw, 16px);
+    gap: clamp(4px, 1.6cqw, 12px);
   }
   .pathway-sign-text {
     font-family: 'Cinzel', serif;
     font-weight: 800;
-    font-size: clamp(9px, 5.2cqw, 17px);
+    font-size: clamp(8px, 3.6cqw, 15px);
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: #2C1205;
-    line-height: 1.3;
+    color: #FCDD8B;
+    line-height: 1.25;
     margin: 0;
     /* .pathway-sign-content is display:flex; flex-direction:column
        with align-items:center (not stretch) -- column-direction
@@ -1064,36 +1102,53 @@
     width: 100%;
     min-width: 0;
     overflow-wrap: break-word;
+    /* Matches the dark-drop-shadow-plus-glow treatment used on the
+       other #FCDD8B gold text elsewhere on the site -- the glow alone
+       barely showed up against the light wood, since both are pale/
+       warm tones with little contrast between them. */
     text-shadow:
-      0 0 8px rgba(255, 210, 60, 0.9),
-      0 0 16px rgba(255, 180, 20, 0.7),
-      0 0 28px rgba(255, 160, 0, 0.5);
+      0 0 8px rgba(255, 210, 60, 0.7),
+      0 2px 3px rgba(0, 0, 0, 0.85),
+      0 1px 2px rgba(0, 0, 0, 0.9);
   }
+  /* Was a plain circular glyph button -- now just a click target sized
+     to the arrow artwork itself, no background/border of its own since
+     the images already carry their own gold-and-maroon styling. */
   .pathway-sign-button {
-    width: clamp(26px, 9cqw, 46px);
-    height: clamp(26px, 9cqw, 46px);
-    border-radius: 50%;
-    background: #FCDD8B;
-    color: #4A2E10;
-    border: 2px solid #B8752A;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(13px, 4cqw, 22px);
+    display: block;
+    width: clamp(56px, 20cqw, 110px);
     text-decoration: none;
-    box-shadow: 0 0 14px rgba(252, 221, 139, 0.6);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.25s ease, filter 0.25s ease;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+  }
+  .pathway-sign-arrow-img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
   .pathway-sign-button:hover, .pathway-sign-button:focus-visible {
     transform: scale(1.12);
-    box-shadow: 0 0 22px rgba(252, 221, 139, 0.9);
+    filter: drop-shadow(0 4px 14px rgba(252, 221, 139, 0.7));
   }
   @media (max-width: 768px) {
-    /* Side-by-side even on mobile now, not stacked -- signs just
-       shrink further so 2 * width + gap always fits within the
-       narrower row. Checked down to 320px-wide devices. */
-    .pathway-section { padding: 60px 1.6%; gap: 4px; }
-    .pathway-sign { width: clamp(148px, 47vw, 460px); }
+    /* Stacked instead of squeezed side-by-side -- fighting to keep
+       both signs on one row was forcing them so small the text barely
+       fit. Simple centered column instead: each sign gets to be much
+       bigger (readable, matches the desktop proportions better) and
+       they just stack with breathing room between them. */
+    .pathway-section {
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 4%;
+      gap: 6px;
+    }
+    .pathway-sign {
+      width: min(96vw, 560px);
+      /* The desktop nudge-down (to clear the heading in a single row)
+         isn't needed here -- justify-content:center + gap already
+         space the stacked pair out nicely on their own. */
+      transform: none;
+    }
   }
 
   /* ============================================================
@@ -1114,7 +1169,7 @@
     background: #141d0c;
     color: rgba(255, 255, 255, 0.85);
     font-size: 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Cinzel', serif;
     overflow: hidden;
   }
   /* Flat-vector landscape band -- layered ridge/treeline shapes, a
@@ -1426,7 +1481,6 @@
     <img src="assets/img/BACKGROUND_COMPETITIONS.png" class="competitions-bg" loading="lazy" alt="">
     <div class="competitions-heading">
       <img src="assets/img/headings/Competition.png" class="section-heading-img" alt="Competitions" loading="lazy">
-      <p>Every stone marks a battlefield of its own.</p>
     </div>
     <div class="rock-scatter" id="rockScatter"></div>
   </section>
@@ -1446,19 +1500,27 @@
   <section id="pathway" class="pathway-section">
     <img src="assets/img/PathwayBackground.jpeg" class="competitions-bg" loading="lazy" alt="">
 
+    <div class="pathway-heading">
+      <img src="assets/img/headings/pathway.png" class="section-heading-img" alt="Join the Journey" loading="lazy">
+    </div>
+
     <div class="pathway-sign pathway-sign-left">
-      <img src="assets/img/sign1.png" class="sign-img" alt="Wooden signpost" loading="lazy">
+      <img src="assets/img/sign_flowers_recolored.png" class="sign-img" alt="Wooden signpost" loading="lazy">
       <div class="pathway-sign-content">
         <p class="pathway-sign-text">Want to Know More<br>About Fortelations?</p>
-        <a href="#hero" class="pathway-sign-button" aria-label="Learn more about Fortelations">&#8592;</a>
+        <a href="https://heyzine.com/flip-book/bb5a21ae78.html#page/85" target="_blank" rel="noopener" class="pathway-sign-button" aria-label="Learn more about Fortelations">
+          <img src="assets/img/arrow_left.png" class="pathway-sign-arrow-img" alt="" loading="lazy">
+        </a>
       </div>
     </div>
 
     <div class="pathway-sign pathway-sign-right">
-      <img src="assets/img/sign2.png" class="sign-img" alt="Wooden signpost" loading="lazy">
+      <img src="assets/img/sign_vines_recolored.png" class="sign-img" alt="Wooden signpost" loading="lazy">
       <div class="pathway-sign-content">
         <p class="pathway-sign-text">Want to Check Our<br>Event Timeline?</p>
-        <a href="#about" class="pathway-sign-button" aria-label="Check our event timeline">&#8594;</a>
+        <a href="calendar.html" class="pathway-sign-button" aria-label="Check our event timeline">
+          <img src="assets/img/arrow_right.png" class="pathway-sign-arrow-img" alt="" loading="lazy">
+        </a>
       </div>
     </div>
   </section>
