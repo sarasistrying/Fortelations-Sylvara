@@ -691,12 +691,21 @@
     align-items: center;
     gap: 20px;
   }
+  /* Two different orderings of the same logos -- .footer-sponsors-desktop
+     is the 3-line composition shown by default; .footer-sponsors-mobile
+     (hero row on top, Media Partners pulled into the middle of the
+     stack) swaps in below 640px. Only one is ever visible. */
+  .footer-sponsors-mobile { display: none; }
+  @media (max-width: 640px) {
+    .footer-sponsors-desktop { display: none; }
+    .footer-sponsors-mobile { display: flex; }
+  }
   .footer-sponsors-line {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 18px 28px;
+    gap: clamp(8px, 1.6vw, 18px) clamp(10px, 2.2vw, 28px);
   }
   .footer-sponsors-line img {
     width: auto;
@@ -708,22 +717,36 @@
     opacity: 1;
     transform: translateY(-2px);
   }
-  .spon-xl { height: 88px; }
-  .spon-m  { height: 34px; }
-  .spon-s  { height: 24px; }
+  /* Sized with vw-based clamp() rather than a single mobile
+     breakpoint, so the whole sponsor block (and the size relationship
+     between the hero/mid/small tiers) scales down smoothly with the
+     viewport instead of jumping at 640px -- it keeps looking like
+     the same composition at any screen size instead of a
+     desktop layout that's just switched out for a smaller one. */
+  .spon-xl { height: clamp(40px, 6vw, 88px); }
+  .spon-m  { height: clamp(20px, 2.6vw, 34px); }
+  .spon-s  { height: clamp(15px, 1.8vw, 24px); }
+  /* The mobile hero row (Sharp/Pertamina/Aqua) needs to stay on one
+     line even on narrow phones, so it gets its own lower size floor
+     and a tighter gap instead of sharing .spon-xl's normal floor. */
+  .footer-sponsors-hero-line {
+    flex-wrap: nowrap;
+    gap: clamp(4px, 3vw, 28px);
+  }
+  .footer-sponsors-hero-line img { height: clamp(26px, 9vw, 88px); }
   .footer-sponsors-partners {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 10px 22px;
+    gap: clamp(5px, 1vw, 8px);
+    padding: clamp(6px, 1vw, 10px) clamp(12px, 2.4vw, 22px);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.04);
   }
   .footer-sponsors-partners-label {
     margin: 0;
-    font-size: 9px;
+    font-size: clamp(7px, 0.9vw, 9px);
     font-weight: 600;
     letter-spacing: 1.2px;
     text-transform: uppercase;
@@ -732,14 +755,7 @@
   .footer-sponsors-partners-row {
     display: flex;
     align-items: center;
-    gap: 18px;
-  }
-  @media (max-width: 640px) {
-    .spon-xl { height: 62px; }
-    .spon-m  { height: 26px; }
-    .spon-s  { height: 18px; }
-    .footer-sponsors-line { gap: 14px 18px; }
-    .footer-sponsors-partners-row { gap: 12px; }
+    gap: clamp(8px, 1.6vw, 18px);
   }
   /* Bottom row is a single centered stack -- copyright, contact,
      then socials. */
@@ -948,7 +964,7 @@
 
   <div class="footer-sponsors">
     <p class="footer-sponsors-label">Our Sponsors</p>
-    <div class="footer-sponsors-rows">
+    <div class="footer-sponsors-rows footer-sponsors-desktop">
       <div class="footer-sponsors-line">
         <img src="assets/img/SPONSORS/s9.png" alt="Deshan Institute" class="spon-s" loading="lazy">
         <img src="assets/img/SPONSORS/s7.png" alt="Lumindo Artha Sejati" class="spon-m" loading="lazy">
@@ -981,6 +997,52 @@
             <img src="assets/img/SPONSORS/s10.png" alt="Rumor" class="spon-s" loading="lazy">
           </div>
         </div>
+        <img src="assets/img/SPONSORS/s14.png" alt="PT Anugerah Terang Persada" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s17.png" alt="KMTS" class="spon-m" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Mobile-only arrangement: the "big three" pinned at the very
+         top, Media Partners pulled out to sit in the middle of the
+         stack (roughly half the remaining logos above it, half
+         below), everything else just stacking/wrapping as usual.
+         Desktop keeps its own 3-line composition above; only one of
+         the two is ever visible (toggled in the media query below). -->
+    <div class="footer-sponsors-rows footer-sponsors-mobile">
+      <div class="footer-sponsors-line footer-sponsors-hero-line">
+        <img src="assets/img/SPONSORS/s1.png" alt="Sharp" class="spon-xl" loading="lazy">
+        <img src="assets/img/SPONSORS/s2.png" alt="Pertamina Gas Kita" class="spon-xl" loading="lazy">
+        <img src="assets/img/SPONSORS/s3.png" alt="Aqua" class="spon-xl" loading="lazy">
+      </div>
+      <div class="footer-sponsors-line">
+        <img src="assets/img/SPONSORS/s9.png" alt="Deshan Institute" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s7.png" alt="Lumindo Artha Sejati" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s6.png" alt="Geliga" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s16.png" alt="Mitratel" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s8.png" alt="Se'Indonesia" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s15.png" alt="Mandiri" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s5.png" alt="iFree" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s4.png" alt="Zap" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s20.png" alt="UBM" class="spon-m" loading="lazy">
+      </div>
+      <div class="footer-sponsors-line footer-sponsors-partners-line">
+        <div class="footer-sponsors-partners">
+          <p class="footer-sponsors-partners-label">Media Partners</p>
+          <div class="footer-sponsors-partners-row">
+            <img src="assets/img/SPONSORS/s12.png" alt="Huru Hara" class="spon-s" loading="lazy">
+            <img src="assets/img/SPONSORS/s11.png" alt="Artatix" class="spon-s" loading="lazy">
+            <img src="assets/img/SPONSORS/s10.png" alt="Rumor" class="spon-s" loading="lazy">
+          </div>
+        </div>
+      </div>
+      <div class="footer-sponsors-line">
+        <img src="assets/img/SPONSORS/s13.png" alt="Wonhae" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s24.png" alt="Emina" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s23.png" alt="Sponsor 23" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s22.png" alt="Sponsor 22" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s19.png" alt="UMN" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s21.png" alt="LexSquare.id" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s18.png" alt="TMI" class="spon-m" loading="lazy">
         <img src="assets/img/SPONSORS/s14.png" alt="PT Anugerah Terang Persada" class="spon-m" loading="lazy">
         <img src="assets/img/SPONSORS/s17.png" alt="KMTS" class="spon-m" loading="lazy">
       </div>
