@@ -819,6 +819,54 @@
     margin: 0 auto;
     background: rgba(255, 255, 255, 0.08);
   }
+  /* Sponsor logos -- small, muted row of chips sitting between the
+     nav row and the copyright line. Chips get a pale card background
+     so mixed-color/transparent sponsor art reads cleanly regardless
+     of this footer's own background color. */
+  .footer-sponsors {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 4px 24px 28px;
+  }
+  .footer-sponsors-label {
+    margin: 0 0 16px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  /* Fixed 12-column grid (rather than a natural flex-wrap) so the
+     24 logos always settle into exactly two rows on desktop instead
+     of wrapping unpredictably by image width. */
+  .footer-sponsors-row {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px 20px;
+    align-items: center;
+    justify-items: center;
+  }
+  .footer-sponsors-row img {
+    height: 44px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    opacity: 0.88;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .footer-sponsors-row img:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+  @media (max-width: 900px) {
+    .footer-sponsors-row { grid-template-columns: repeat(8, 1fr); gap: 14px 16px; }
+    .footer-sponsors-row img { height: 38px; }
+  }
+  @media (max-width: 640px) {
+    .footer-sponsors-row { grid-template-columns: repeat(6, 1fr); gap: 12px 14px; }
+    .footer-sponsors-row img { height: 32px; }
+  }
   /* Bottom row is a single centered stack -- copyright, contact,
      then socials. */
   .footer-bottom {
@@ -1089,6 +1137,36 @@
         <li><a href="calendar.html">Calendar</a></li>
       </ul>
     </nav>
+  </div>
+
+  <div class="footer-sponsors">
+    <p class="footer-sponsors-label">Our Sponsors</p>
+    <div class="footer-sponsors-row">
+      <img src="assets/img/SPONSORS/s1.png" alt="Sponsor 1" loading="lazy">
+      <img src="assets/img/SPONSORS/s2.png" alt="Sponsor 2" loading="lazy">
+      <img src="assets/img/SPONSORS/s3.png" alt="Sponsor 3" loading="lazy">
+      <img src="assets/img/SPONSORS/s4.png" alt="Sponsor 4" loading="lazy">
+      <img src="assets/img/SPONSORS/s5.png" alt="Sponsor 5" loading="lazy">
+      <img src="assets/img/SPONSORS/s6.png" alt="Sponsor 6" loading="lazy">
+      <img src="assets/img/SPONSORS/s7.png" alt="Sponsor 7" loading="lazy">
+      <img src="assets/img/SPONSORS/s8.png" alt="Sponsor 8" loading="lazy">
+      <img src="assets/img/SPONSORS/s9.png" alt="Sponsor 9" loading="lazy">
+      <img src="assets/img/SPONSORS/s10.png" alt="Sponsor 10" loading="lazy">
+      <img src="assets/img/SPONSORS/s11.png" alt="Sponsor 11" loading="lazy">
+      <img src="assets/img/SPONSORS/s12.png" alt="Sponsor 12" loading="lazy">
+      <img src="assets/img/SPONSORS/s13.png" alt="Sponsor 13" loading="lazy">
+      <img src="assets/img/SPONSORS/s14.png" alt="Sponsor 14" loading="lazy">
+      <img src="assets/img/SPONSORS/s15.png" alt="Sponsor 15" loading="lazy">
+      <img src="assets/img/SPONSORS/s16.png" alt="Sponsor 16" loading="lazy">
+      <img src="assets/img/SPONSORS/s17.png" alt="Sponsor 17" loading="lazy">
+      <img src="assets/img/SPONSORS/s18.png" alt="Sponsor 18" loading="lazy">
+      <img src="assets/img/SPONSORS/s19.png" alt="Sponsor 19" loading="lazy">
+      <img src="assets/img/SPONSORS/s20.png" alt="Sponsor 20" loading="lazy">
+      <img src="assets/img/SPONSORS/s21.png" alt="Sponsor 21" loading="lazy">
+      <img src="assets/img/SPONSORS/s22.png" alt="Sponsor 22" loading="lazy">
+      <img src="assets/img/SPONSORS/s23.png" alt="Sponsor 23" loading="lazy">
+      <img src="assets/img/SPONSORS/s24.png" alt="Sponsor 24" loading="lazy">
+    </div>
   </div>
 
   <div class="footer-divider"></div>

@@ -250,6 +250,24 @@
       drop-shadow(0 0 12px rgba(239, 157, 109, 0.4));
     animation: logo-float 3s ease-in-out infinite;
   }
+  /* Hero -> calendar-section seam. Instead of the usual single-color
+     wash, the transition band is tinted differently across its
+     width -- dark forest green at the left and right edges, easing
+     into white at the center -- so the seam reads as a soft glow
+     rather than a flat curtain. This half lives at the bottom of the
+     hero (mask fades transparent at the top down to fully solid at
+     the very bottom edge); its mirror image at the top of
+     .calendar-section (below) completes the band across the seam. */
+  .calendar-hero-fade {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 260px;
+    background: linear-gradient(to right, #0f2108 0%, #0f2108 30%, #E7FAF6 50%, #0f2108 70%, #0f2108 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
 
   /* ============================================================
      CALENDAR SECTION -- VERTICAL PATHWAY SCATTER
@@ -300,10 +318,30 @@
     pointer-events: none;
   }
 
+  /* Mirror of .calendar-hero-fade -- same left/middle/right coloring,
+     but starts fully solid at the top (the seam) and fades down to
+     transparent, revealing this section's own background beneath. */
+  .calendar-section-fade-top {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 260px;
+    background: linear-gradient(to right, #0f2108 0%, #0f2108 30%, #E7FAF6 50%, #0f2108 70%, #0f2108 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
   .plank-scatter {
     position: relative;
     width: 100%;
-    max-width: 1300px;
+    /* Raised from 1300px so the stage (and the planks, sized as a
+       percentage of it below) keeps growing on larger screens
+       instead of plateauing at ordinary laptop widths -- positions
+       and sizes are both percentage-based here, so they scale up
+       together and stay collision-safe at any width in between.
+       Matches the same change on index.html's .rock-scatter. */
+    max-width: 1900px;
     margin: 0 auto;
     height: 420vh;
     z-index: 1;
@@ -324,7 +362,13 @@
     -webkit-tap-highlight-color: transparent;
     will-change: transform;
     transform: translate(-50%, -50%) scale(var(--depth-scale, 1));
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, width 0.3s ease;
+    /* Width comes in as an inline percentage (see PLANKS/size in the
+       script below) -- this caps the pixel result in step with
+       .plank-scatter's new max-width, the same way .rock's clamp()
+       does on index.html, so planks keep growing on bigger screens
+       but settle at a sensible ceiling instead of ballooning. */
+    max-width: 430px;
   }
 
   .plank-card:hover,
@@ -618,6 +662,54 @@
     margin: 0 auto;
     background: rgba(255, 255, 255, 0.08);
   }
+  /* Sponsor logos -- small, muted row of chips sitting between the
+     nav row and the copyright line. Chips get a pale card background
+     so mixed-color/transparent sponsor art reads cleanly regardless
+     of this footer's own background color. */
+  .footer-sponsors {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 4px 24px 28px;
+  }
+  .footer-sponsors-label {
+    margin: 0 0 16px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  /* Fixed 12-column grid (rather than a natural flex-wrap) so the
+     24 logos always settle into exactly two rows on desktop instead
+     of wrapping unpredictably by image width. */
+  .footer-sponsors-row {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px 20px;
+    align-items: center;
+    justify-items: center;
+  }
+  .footer-sponsors-row img {
+    height: 44px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    opacity: 0.88;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .footer-sponsors-row img:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+  @media (max-width: 900px) {
+    .footer-sponsors-row { grid-template-columns: repeat(8, 1fr); gap: 14px 16px; }
+    .footer-sponsors-row img { height: 38px; }
+  }
+  @media (max-width: 640px) {
+    .footer-sponsors-row { grid-template-columns: repeat(6, 1fr); gap: 12px 14px; }
+    .footer-sponsors-row img { height: 32px; }
+  }
   /* Bottom row is a single centered stack -- copyright, contact,
      then socials. */
   .footer-bottom {
@@ -722,10 +814,12 @@
 <section class="calendar-hero">
   <img src="assets/img/BACKGROUND_FOUNTAIN.png" class="calendar-hero-bg" alt="" loading="eager">
   <img src="assets/img/headings/EventCalender.png" class="calendar-hero-heading-img" alt="Event Calendar" loading="eager">
+  <div class="calendar-hero-fade" aria-hidden="true"></div>
 </section>
 
 <section class="calendar-section" id="calendarSection">
   <img src="assets/img/BACKGROUND FOUNTAIN 2.png" class="calendar-bg" id="calendarBg" loading="lazy" alt="">
+  <div class="calendar-section-fade-top" aria-hidden="true"></div>
   <div class="plank-scatter" id="plankScatter"></div>
 </section>
 
@@ -819,6 +913,36 @@
         <li><a href="calendar.html">Calendar</a></li>
       </ul>
     </nav>
+  </div>
+
+  <div class="footer-sponsors">
+    <p class="footer-sponsors-label">Our Sponsors</p>
+    <div class="footer-sponsors-row">
+      <img src="assets/img/SPONSORS/s1.png" alt="Sponsor 1" loading="lazy">
+      <img src="assets/img/SPONSORS/s2.png" alt="Sponsor 2" loading="lazy">
+      <img src="assets/img/SPONSORS/s3.png" alt="Sponsor 3" loading="lazy">
+      <img src="assets/img/SPONSORS/s4.png" alt="Sponsor 4" loading="lazy">
+      <img src="assets/img/SPONSORS/s5.png" alt="Sponsor 5" loading="lazy">
+      <img src="assets/img/SPONSORS/s6.png" alt="Sponsor 6" loading="lazy">
+      <img src="assets/img/SPONSORS/s7.png" alt="Sponsor 7" loading="lazy">
+      <img src="assets/img/SPONSORS/s8.png" alt="Sponsor 8" loading="lazy">
+      <img src="assets/img/SPONSORS/s9.png" alt="Sponsor 9" loading="lazy">
+      <img src="assets/img/SPONSORS/s10.png" alt="Sponsor 10" loading="lazy">
+      <img src="assets/img/SPONSORS/s11.png" alt="Sponsor 11" loading="lazy">
+      <img src="assets/img/SPONSORS/s12.png" alt="Sponsor 12" loading="lazy">
+      <img src="assets/img/SPONSORS/s13.png" alt="Sponsor 13" loading="lazy">
+      <img src="assets/img/SPONSORS/s14.png" alt="Sponsor 14" loading="lazy">
+      <img src="assets/img/SPONSORS/s15.png" alt="Sponsor 15" loading="lazy">
+      <img src="assets/img/SPONSORS/s16.png" alt="Sponsor 16" loading="lazy">
+      <img src="assets/img/SPONSORS/s17.png" alt="Sponsor 17" loading="lazy">
+      <img src="assets/img/SPONSORS/s18.png" alt="Sponsor 18" loading="lazy">
+      <img src="assets/img/SPONSORS/s19.png" alt="Sponsor 19" loading="lazy">
+      <img src="assets/img/SPONSORS/s20.png" alt="Sponsor 20" loading="lazy">
+      <img src="assets/img/SPONSORS/s21.png" alt="Sponsor 21" loading="lazy">
+      <img src="assets/img/SPONSORS/s22.png" alt="Sponsor 22" loading="lazy">
+      <img src="assets/img/SPONSORS/s23.png" alt="Sponsor 23" loading="lazy">
+      <img src="assets/img/SPONSORS/s24.png" alt="Sponsor 24" loading="lazy">
+    </div>
   </div>
 
   <div class="footer-divider"></div>
