@@ -680,35 +680,66 @@
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.4);
   }
-  /* Fixed 12-column grid (rather than a natural flex-wrap) so the
-     24 logos always settle into exactly two rows on desktop instead
-     of wrapping unpredictably by image width. */
-  .footer-sponsors-row {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 16px 20px;
+  /* Laid out to mirror the actual sponsor board artwork rather than
+     a uniform grid: a few "hero" logos (Sharp, Pertamina Gas Kita,
+     Aqua) sized noticeably larger, most logos at one shared mid
+     size, a handful of smaller supporting marks, and the three
+     media partners grouped together in their own labeled panel. */
+  .footer-sponsors-rows {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-items: center;
+    gap: 20px;
   }
-  .footer-sponsors-row img {
-    height: 44px;
+  .footer-sponsors-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 18px 28px;
+  }
+  .footer-sponsors-line img {
     width: auto;
-    max-width: 100%;
     object-fit: contain;
     opacity: 0.88;
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
-  .footer-sponsors-row img:hover {
+  .footer-sponsors-line img:hover {
     opacity: 1;
     transform: translateY(-2px);
   }
-  @media (max-width: 900px) {
-    .footer-sponsors-row { grid-template-columns: repeat(8, 1fr); gap: 14px 16px; }
-    .footer-sponsors-row img { height: 38px; }
+  .spon-xl { height: 88px; }
+  .spon-m  { height: 34px; }
+  .spon-s  { height: 24px; }
+  .footer-sponsors-partners {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .footer-sponsors-partners-label {
+    margin: 0;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  .footer-sponsors-partners-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
   }
   @media (max-width: 640px) {
-    .footer-sponsors-row { grid-template-columns: repeat(6, 1fr); gap: 12px 14px; }
-    .footer-sponsors-row img { height: 32px; }
+    .spon-xl { height: 62px; }
+    .spon-m  { height: 26px; }
+    .spon-s  { height: 18px; }
+    .footer-sponsors-line { gap: 14px 18px; }
+    .footer-sponsors-partners-row { gap: 12px; }
   }
   /* Bottom row is a single centered stack -- copyright, contact,
      then socials. */
@@ -917,31 +948,42 @@
 
   <div class="footer-sponsors">
     <p class="footer-sponsors-label">Our Sponsors</p>
-    <div class="footer-sponsors-row">
-      <img src="assets/img/SPONSORS/s1.png" alt="Sponsor 1" loading="lazy">
-      <img src="assets/img/SPONSORS/s2.png" alt="Sponsor 2" loading="lazy">
-      <img src="assets/img/SPONSORS/s3.png" alt="Sponsor 3" loading="lazy">
-      <img src="assets/img/SPONSORS/s4.png" alt="Sponsor 4" loading="lazy">
-      <img src="assets/img/SPONSORS/s5.png" alt="Sponsor 5" loading="lazy">
-      <img src="assets/img/SPONSORS/s6.png" alt="Sponsor 6" loading="lazy">
-      <img src="assets/img/SPONSORS/s7.png" alt="Sponsor 7" loading="lazy">
-      <img src="assets/img/SPONSORS/s8.png" alt="Sponsor 8" loading="lazy">
-      <img src="assets/img/SPONSORS/s9.png" alt="Sponsor 9" loading="lazy">
-      <img src="assets/img/SPONSORS/s10.png" alt="Sponsor 10" loading="lazy">
-      <img src="assets/img/SPONSORS/s11.png" alt="Sponsor 11" loading="lazy">
-      <img src="assets/img/SPONSORS/s12.png" alt="Sponsor 12" loading="lazy">
-      <img src="assets/img/SPONSORS/s13.png" alt="Sponsor 13" loading="lazy">
-      <img src="assets/img/SPONSORS/s14.png" alt="Sponsor 14" loading="lazy">
-      <img src="assets/img/SPONSORS/s15.png" alt="Sponsor 15" loading="lazy">
-      <img src="assets/img/SPONSORS/s16.png" alt="Sponsor 16" loading="lazy">
-      <img src="assets/img/SPONSORS/s17.png" alt="Sponsor 17" loading="lazy">
-      <img src="assets/img/SPONSORS/s18.png" alt="Sponsor 18" loading="lazy">
-      <img src="assets/img/SPONSORS/s19.png" alt="Sponsor 19" loading="lazy">
-      <img src="assets/img/SPONSORS/s20.png" alt="Sponsor 20" loading="lazy">
-      <img src="assets/img/SPONSORS/s21.png" alt="Sponsor 21" loading="lazy">
-      <img src="assets/img/SPONSORS/s22.png" alt="Sponsor 22" loading="lazy">
-      <img src="assets/img/SPONSORS/s23.png" alt="Sponsor 23" loading="lazy">
-      <img src="assets/img/SPONSORS/s24.png" alt="Sponsor 24" loading="lazy">
+    <div class="footer-sponsors-rows">
+      <div class="footer-sponsors-line">
+        <img src="assets/img/SPONSORS/s9.png" alt="Deshan Institute" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s7.png" alt="Lumindo Artha Sejati" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s6.png" alt="Geliga" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s1.png" alt="Sharp" class="spon-xl" loading="lazy">
+        <img src="assets/img/SPONSORS/s2.png" alt="Pertamina Gas Kita" class="spon-xl" loading="lazy">
+        <img src="assets/img/SPONSORS/s3.png" alt="Aqua" class="spon-xl" loading="lazy">
+      </div>
+      <div class="footer-sponsors-line">
+        <img src="assets/img/SPONSORS/s16.png" alt="Mitratel" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s8.png" alt="Se'Indonesia" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s15.png" alt="Mandiri" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s5.png" alt="iFree" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s4.png" alt="Zap" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s20.png" alt="UBM" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s13.png" alt="Wonhae" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s24.png" alt="Emina" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s23.png" alt="Sponsor 23" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s22.png" alt="Sponsor 22" class="spon-m" loading="lazy">
+      </div>
+      <div class="footer-sponsors-line">
+        <img src="assets/img/SPONSORS/s19.png" alt="UMN" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s21.png" alt="LexSquare.id" class="spon-s" loading="lazy">
+        <img src="assets/img/SPONSORS/s18.png" alt="TMI" class="spon-m" loading="lazy">
+        <div class="footer-sponsors-partners">
+          <p class="footer-sponsors-partners-label">Media Partners</p>
+          <div class="footer-sponsors-partners-row">
+            <img src="assets/img/SPONSORS/s12.png" alt="Huru Hara" class="spon-s" loading="lazy">
+            <img src="assets/img/SPONSORS/s11.png" alt="Artatix" class="spon-s" loading="lazy">
+            <img src="assets/img/SPONSORS/s10.png" alt="Rumor" class="spon-s" loading="lazy">
+          </div>
+        </div>
+        <img src="assets/img/SPONSORS/s14.png" alt="PT Anugerah Terang Persada" class="spon-m" loading="lazy">
+        <img src="assets/img/SPONSORS/s17.png" alt="KMTS" class="spon-m" loading="lazy">
+      </div>
     </div>
   </div>
 
